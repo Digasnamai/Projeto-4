@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="pt">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AIT - Percepta OS</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+
+    <div id="crt-container">
+
+        <div id="boot-screen">
+
+            <div id="boot-menu">
+                <div id="boot-title">PERCEPTA</div>
+                <div class="boot-buttons-container">
+                    <button id="boot-start-btn">:: BOOT UP ::</button>
+                    <button id="boot-about-btn">:: ABOUT ::</button>
+                </div>
+            </div>
+
+            <pre id="boot-terminal"></pre>
+
+            <div id="boot-about-section" style="display: none;">
+                <div class="boot-about-content">
+                    <h2>About Section</h2>
+                    <p>Using the theme "Technology and Society," specifically techno-anxiety, surveillance, hybrid
+                        intelligence, and automation, our goal is to create an interactive experience where a simulated
+                        work environment is the main component. This multimedia object aims to incite critical thinking.
+                        By creating a charismatic virtual assistant that mimics human behavior and distracts the user,
+                        we highlight the negative impacts of technological evolution and the excessive use of artificial
+                        intelligence. Thus, we emphasize the inconsequentiality of isolated individual rejection and the
+                        urgency of a collective effort; it is not enough for one person to reject this technology to
+                        solve the problem; a joint movement is necessary to minimize social and environmental damage.
+                    </p>
+                    <button id="boot-about-close">:: CLOSE ::</button>
+                </div>
+            </div>
+        </div>
+
+
+        <div id="desktop">
+
+            <div class="window" id="percepta-dialog"
+                style="display: none; position: absolute; top: 50%; left: 50%; width: 320px; z-index: 9999; box-shadow: 2px 2px 10px rgba(0,0,0,0.8);">
+                <div class="window-header" id="dialog-header" onmousedown="dragWindow(event, 'percepta-dialog')">
+                    <span class="window-title" id="dialog-title">Percepta OS</span>
+                    <button class="close-btn" id="dialog-btn-close">X</button>
+                </div>
+                <div class="window-content" style="padding: 15px; text-align: center; background: #c0c0c0;">
+
+                    <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px; text-align: left;">
+                        <span id="dialog-icon" style="font-size: 32px;">⚠️</span>
+                        <p id="dialog-message" style="margin: 0; font-size: 14px;"></p>
+                    </div>
+
+                    <input type="text" id="dialog-input"
+                        style="display: none; width: 90%; margin-bottom: 15px; border: 2px inset #fff; padding: 4px; font-family: sans-serif;">
+
+                    <div style="display: flex; justify-content: center; gap: 10px;">
+                        <button class="btn-retro" id="dialog-btn-ok" style="width: 80px;">OK</button>
+                        <button class="btn-retro" id="dialog-btn-cancel"
+                            style="display: none; width: 80px;">Cancel</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="window" id="save-as-dialog"
+                style="display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 400px; z-index: 10001; box-shadow: 2px 2px 10px rgba(0,0,0,0.8);">
+                <div class="window-header" onmousedown="dragWindow(event, 'save-as-dialog')">
+                    <span class="window-title">Save As...</span>
+                    <button class="close-btn" id="save-as-close-x">X</button>
+                </div>
+                <div class="window-content"
+                    style="padding: 10px; background: #c0c0c0; display: flex; flex-direction: column; gap: 10px;">
+
+                    <div style="display: flex; gap: 5px; align-items: center;">
+                        <button class="btn-retro" id="save-as-up-btn" style="padding: 2px 5px;">⬆️ Up</button>
+                        <input type="text" id="save-as-path-display" readonly
+                            style="flex-grow: 1; border: 2px inset #fff; padding: 3px;">
+                    </div>
+
+                    <div id="save-as-folder-list"
+                        style="height: 150px; background: white; border: 2px inset #fff; overflow-y: auto; padding: 5px; display: flex; flex-direction: column; gap: 2px; user-select: none;">
+                    </div>
+
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <label style="white-space: nowrap;">File name:</label>
+                        <input type="text" id="save-as-filename"
+                            style="flex-grow: 1; border: 2px inset #fff; padding: 3px;">
+                    </div>
+
+                    <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                        <button class="btn-retro" id="save-as-btn-ok" style="width: 80px;">Save</button>
+                        <button class="btn-retro" id="save-as-btn-cancel" style="width: 80px;">Cancel</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="desktop-icon" style="top: 120px; left: 20px;" ondblclick="openWindow('tasks')">
+                <img src="media/AIT.png" alt="AIT Task">
+                <span>AIT.exe</span>
+            </div>
+
+            <div class="desktop-icon" style="top: 220px; left: 20px;"
+                ondblclick="forceNewText(); openWindow('notepad-app');">
+                <img src="media/bloco.png" alt="Notepad">
+                <span>Notepad</span>
+            </div>
+
+            <div class="desktop-icon" style="top: 320px; left: 20px;" ondblclick="openWindow('paint-app')">
+                <img src="media/paint.png" alt="Paint">
+                <span>Paint</span>
+            </div>
+
+            <div class="desktop-icon" style="top: 420px; left: 20px;"
+                ondblclick="currentPath = 'C:\\\\Users\\\\Participant'; openWindow('file-explorer'); renderFileExplorer();">
+                <img src="media/pasta coisas.png" alt="Files">
+                <span>Files</span>
+            </div>
+
+            <div class="desktop-icon" style="top: 520px; left: 20px;" ondblclick="openEmailApp()">
+                <img src="media/email.png" alt="Email">
+                <span>Mail</span>
+                <div id="email-notif-dot"
+                    style="display: none; position: absolute; top: -5px; right: -5px; background: red; color: white; border: 2px solid white; border-radius: 10px; padding: 2px 5px; font-size: 10px; font-weight: bold; min-width: 10px; text-align: center; pointer-events: none; z-index: 100;">
+                    0
+                </div>
+            </div>
+
+            <div class="desktop-icon" style="top: 120px; left: 120px;" ondblclick="openBrowserApp()">
+                <img src="media/internet.png" alt="Web">
+                <span>Percepta Web</span>
+            </div>
+
+            <div class="desktop-icon" style="top: 220px; left: 120px;"
+                ondblclick="openWindow('file-explorer'); currentPath = 'C:\\\\Trash'; renderFileExplorer();">
+                <img src="media/lixo.png" alt="Trash">
+                <span>Recycle Bin</span>
+            </div>
+
+            <div id="log-viewer-app" class="window"
+                style="top: 150px; left: 150px; width: 450px; height: 400px; display: none; flex-direction: column;">
+                <div class="window-header" onmousedown="dragWindow(event, 'log-viewer-app')">
+                    <span class="window-title" id="log-viewer-title">System Analysis Viewer</span>
+                    <div style="display: flex; gap: 2px;">
+                        <button class="minimize-btn" onclick="minimizeWindow('log-viewer-app')">_</button>
+                        <button class="close-btn" onclick="closeWindow('log-viewer-app')">X</button>
+                    </div>
+                </div>
+
+                <div class="window-content" style="padding: 2px; display: flex; flex-direction: column; background: #c0c0c0; flex-grow: 1; height: calc(100% - 30px); overflow: hidden;">
+                    <div id="log-viewer-content" style="height: 100%; border: 2px inset #fff; padding: 5px; font-family: monospace; font-size: 14px; background: white; color: black; overflow-y: scroll; white-space: pre-wrap; outline: none; box-sizing: border-box;">
+                        <div id="log-text-container" style="padding-bottom: 20px;"></div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="desktop-icon" style="top: 20px; left: 120px;" ondblclick="openWindow('flappy-app')">
+                <img src="media/jogo.png" alt="Game">
+                <span>Bird.exe</span>
+            </div>
+
+            <div class="window" id="notepad-app"
+                style="top: 150px; left: 150px; width: 450px; height: 400px; display: none; flex-direction: column;">
+                <div class="window-header" onmousedown="dragWindow(event, 'notepad-app')">
+                    <span class="window-title" id="notepad-title">
+                        <img src="media/bloco.png" style="width: 30px; height: 30px; vertical-align: middle;">
+                        <span>untitled - Notepad</span>
+                    </span>
+                    <div style="display: flex; gap: 2px;">
+                        <button class="minimize-btn" onclick="minimizeWindow('notepad-app')">_</button>
+                        <button class="close-btn" onclick="tryCloseNotepad()">X</button>
+                    </div>
+                </div>
+
+                <div class="menu-bar">
+                    <div class="menu-item"><u>F</u>ile
+                        <div class="dropdown">
+                            <div onclick="newText()">New</div>
+                            <div onclick="saveText()">Save</div>
+                            <hr>
+                            <div onclick="tryCloseNotepad()">Exit</div>
+                        </div>
+                    </div>
+                    <div class="menu-item"><u>E</u>dit
+                        <div class="dropdown">
+                            <div onclick="document.getElementById('notepad-textarea').value = ''">Clear All</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="window-content"
+                    style="padding: 2px; display: flex; flex-direction: column; background: #c0c0c0; flex-grow: 1; height: calc(100% - 60px);">
+                    <textarea id="notepad-textarea" spellcheck="false"
+                        style="flex-grow: 1; border: 2px inset #fff; padding: 5px; font-family: monospace; font-size: 14px; resize: none; outline: none; background: white; color: black;"></textarea>
+                </div>
+            </div>
+
+            <div class="window" id="folder-logs"
+                style="top: 150px; left: 250px; width: 450px; height: 400px; display: none; z-index: 100; overflow: hidden;">
+                <div class="window-header" onmousedown="dragWindow(event, 'folder-logs')">
+                    <span class="window-title">
+                        <img src="media/pasta.png" style="width: 30px; height: 30px; vertical-align: middle;">
+                        <span>C:\SYSTEM\LOGS</span>
+                    </span>
+                    <div style="display: flex; gap: 2px;">
+                        <button class="minimize-btn" onclick="minimizeWindow('folder-logs')">_</button>
+                        <button class="close-btn" onclick="closeWindow('folder-logs')">X</button>
+                    </div>
+                </div>
+
+                <div class="window-content"
+                    style="background: #c0c0c0; padding: 5px; display: flex; flex-direction: column; gap: 5px; height: calc(100% - 25px); box-sizing: border-box; border: none; margin: 0;">
+
+                    <div style="display: flex; align-items: center; gap: 10px; flex-shrink: 0; padding: 2px;">
+                        <span style="font-size: 14px;">Address</span>
+                        <input type="text" id="logs-address-bar" readonly value="C:\SYSTEM\LOGS"
+                            style="flex-grow: 1; border: 2px inset #fff; padding: 3px; background: #e0e0e0; font-family: 'Pixelated', sans-serif;">
+                    </div>
+
+                    <div id="logs-static-list"
+                        style="background: #ffffff; border: 2px inset #fff; flex-grow: 1; padding: 10px; display: flex; flex-wrap: wrap; align-content: flex-start; gap: 20px; overflow-y: auto;">
+                    </div>
+                </div>
+            </div>
+
+            <div class="window" id="tasks" style="top: 150px; left: 220px; width: 500px; display: none;">
+                <div class="window-header" onmousedown="dragWindow(event, 'tasks')">
+                    <span class="window-title">
+                        <img src="media/AIT.png" style="width: 30px; height: 30px; vertical-align: middle;">
+                        <span>AIT: Artificial Intelligence Training</span>
+                    </span>
+                    <div style="display: flex; gap: 2px;">
+                        <button class="minimize-btn" onclick="minimizeWindow('tasks')">_</button>
+                        <button class="close-btn" onclick="closeWindow('tasks')">X</button>
+                    </div>
+                </div>
+                <div class="window-content" id="ait-content-area"
+                    style="background: #c0c0c0; display: flex; flex-direction: column;">
+                </div>
+            </div>
+
+            <div class="window" id="paint-app" style="top: 50px; left: 50px; width: 450px; display: none;">
+                <div class="window-header" onmousedown="dragWindow(event, 'paint-app')">
+                    <span class="window-title">
+                        <img src="media/paint.png" style="width: 30px; height: 30px; vertical-align: middle;">
+                        <span>untitled - Paint</span>
+                    </span>
+                    <div style="display: flex; gap: 2px;">
+                        <button class="minimize-btn" onclick="minimizeWindow('paint-app')">_</button>
+                        <button class="close-btn" onclick="tryClosePaint()">X</button>
+                    </div>
+                </div>
+
+                <div class="menu-bar">
+                    <div class="menu-item"><u>F</u>ile
+                        <div class="dropdown">
+                            <div
+                                onclick="newDrawing(); this.parentElement.style.display='none'; setTimeout(() => this.parentElement.style.display='', 100);">
+                                New</div>
+                            <div
+                                onclick="saveDrawing(); this.parentElement.style.display='none'; setTimeout(() => this.parentElement.style.display='', 100);">
+                                Save</div>
+                            <hr>
+                            <div
+                                onclick="tryClosePaint(); this.parentElement.style.display='none'; setTimeout(() => this.parentElement.style.display='', 100);">
+                                Exit</div>
+                        </div>
+                    </div>
+                    <div class="menu-item"><u>E</u>dit
+                        <div class="dropdown">
+                            <div
+                                onclick="clearCanvas(); this.parentElement.style.display='none'; setTimeout(() => this.parentElement.style.display='', 100);">
+                                Clear All</div>
+                        </div>
+                    </div>
+                    <div class="menu-item"><u>V</u>iew
+                        <div class="dropdown">
+                            <div
+                                onclick="const tb = document.getElementById('paint-toolbar'); tb.style.display = tb.style.display === 'none' ? 'flex' : 'none'; this.parentElement.style.display='none'; setTimeout(() => this.parentElement.style.display='', 100);">
+                                Toggle Toolbar</div>
+                        </div>
+                    </div>
+                    <div class="menu-item"><u>H</u>elp
+                        <div class="dropdown">
+                            <div
+                                onclick="osAlert('Percepta Paint v1.0\nExpress your creativity.\nWe are watching.', 'About Paint', '🎨'); this.parentElement.style.display='none'; setTimeout(() => this.parentElement.style.display='', 100);">
+                                About</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="window-content"
+                    style="padding: 2px; display: flex; flex-direction: column; background: #c0c0c0; flex-grow: 1;">
+
+                    <div class="toolbar" id="paint-toolbar"
+                        style="padding: 5px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; border-bottom: 2px inset #fff; margin-bottom: 5px; background: #c0c0c0;">
+
+                        <div style="display: flex; border: 2px inset #fff; background: #fff;">
+                            <button id="tool-brush" class="btn-retro" onclick="setPaintTool('brush')"
+                                style="border: none; padding: 2px 5px; background: #000080; color: white;">🖌️</button>
+                            <button id="tool-eraser" class="btn-retro" onclick="setPaintTool('eraser')"
+                                style="border: none; padding: 2px 5px; background: #c0c0c0; color: black;">🧽</button>
+                        </div>
+
+                        <div style="display: flex; align-items: center; gap: 5px;">
+                            <input type="color" id="brush-color" value="#000000"
+                                style="cursor: pointer; width: 25px; height: 25px; padding: 0;">
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 5px;">
+                            <label style="font-size: 12px;">Size:</label>
+                            <input type="range" id="brush-size" min="1" max="20" value="3" style="width: 70px;">
+                        </div>
+
+                        <div style="display: flex; align-items: center; gap: 2px; margin-left: auto;">
+                            <button class="btn-retro" onclick="zoomPaint(-0.5)"
+                                style="padding: 2px 5px; font-weight: bold;">-</button>
+                            <span id="zoom-level-display"
+                                style="font-size: 12px; width: 35px; text-align: center;">100%</span>
+                            <button class="btn-retro" onclick="zoomPaint(0.5)"
+                                style="padding: 2px 5px; font-weight: bold;">+</button>
+                        </div>
+                    </div>
+
+                    <div id="paint-workspace"
+                        style="border: 2px inset #fff; background: #808080; flex-grow: 1; overflow: hidden; position: relative;">
+
+                        <canvas id="paint-canvas" width="400" height="300"
+                            style="background: white; cursor: crosshair; transform-origin: top left; transition: transform 0.1s; position: relative; top: 0px; left: 0px; margin: 20px;"></canvas>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="window" id="flappy-app"
+                style="top: 80px; left: 200px; width: 400px; height: 425px; display: none;">
+                <div class="window-header" onmousedown="dragWindow(event, 'flappy-app')">
+                    <span class="window-title">
+                        <img src="media/jogo.png" style="width: 30px; height: 30px; vertical-align: middle;">
+                        <span>Percepta Bird</span>
+                    </span>
+                    <div style="display: flex; gap: 2px;">
+                        <button class="minimize-btn" onclick="minimizeWindow('flappy-app')">_</button>
+                        <button class="close-btn" onclick="closeWindow('flappy-app')">X</button>
+                    </div>
+                </div>
+                <div class="window-content" id="flappy-container">
+                    <canvas id="flappy-canvas"></canvas>
+
+                    <div id="flappy-overlay"
+                        style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(0,0,0,0.4); color: white; text-align: center;">
+                        <h1 id="flappy-msg" style="margin-bottom: 10px; font-size: 20px;">PERCEPTA BIRD</h1>
+                        <button class="btn-retro" onclick="startFlappyGame()" style="padding: 10px 20px;">START</button>
+                    </div>
+                </div>
+            </div>
+
+            <script src="game.js"></script>
+
+            <div class="window" id="file-explorer"
+                style="top: 100px; left: 200px; width: 450px; height: 400px; display: none;">
+                <div class="window-header" onmousedown="dragWindow(event, 'file-explorer')">
+                    <span class="window-title">
+                        <img src="media/pasta.png" style="width: 30px; height: 30px; vertical-align: middle;">
+                        <span>File Explorer</span>
+                    </span>
+                    <div style="display: flex; gap: 2px;">
+                        <button class="minimize-btn" onclick="minimizeWindow('file-explorer')">_</button>
+                        <button class="close-btn" onclick="closeWindow('file-explorer')">X</button>
+                    </div>
+                </div>
+
+                <div class="menu-bar">
+                    <div class="menu-item"><u>F</u>ile
+                        <div class="dropdown">
+                            <div
+                                onclick="createNewFolder(); this.parentElement.style.display='none'; setTimeout(() => this.parentElement.style.display='', 100);">
+                                New Folder</div>
+                            <hr>
+                            <div
+                                onclick="closeWindow('file-explorer'); this.parentElement.style.display='none'; setTimeout(() => this.parentElement.style.display='', 100);">
+                                Close</div>
+                        </div>
+                    </div>
+                    <div class="menu-item"><u>E</u>dit
+                        <div class="dropdown">
+                            <div
+                                onclick="renameSelectedFile(); this.parentElement.style.display='none'; setTimeout(() => this.parentElement.style.display='', 100);">
+                                Rename</div>
+                        </div>
+                    </div>
+                    <div class="menu-item"><u>V</u>iew
+                        <div class="dropdown">
+                            <div
+                                onclick="renderFileExplorer(); this.parentElement.style.display='none'; setTimeout(() => this.parentElement.style.display='', 100);">
+                                Refresh</div>
+                        </div>
+                    </div>
+                    <div class="menu-item"><u>H</u>elp
+                        <div class="dropdown">
+                            <div
+                                onclick="osAlert('Percepta File Explorer v1.0\nAll your files are safely monitored.', 'About Explorer', 'ℹ️'); this.parentElement.style.display='none'; setTimeout(() => this.parentElement.style.display='', 100);">
+                                About</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="window-content"
+                    style="background: #c0c0c0; padding: 5px; display: flex; flex-direction: column; gap: 5px;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <button class="btn-retro" onclick="goUpDirectory()">⬆️ Up</button>
+                        <span style="font-size: 14px;">Address</span>
+                        <input type="text" id="explorer-address" readonly
+                            style="flex-grow: 1; border: 2px inset #fff; padding: 3px;">
+                    </div>
+
+                    <div id="explorer-file-list"
+                        style="background: #ffffff; border: 2px inset #fff; flex-grow: 1; padding: 10px; display: flex; flex-wrap: wrap; align-content: flex-start; gap: 20px; overflow-y: auto;">
+                    </div>
+                </div>
+            </div>
+
+            <div class="window" id="email-app"
+                style="top: 120px; left: 250px; width: 450px; height: 350px; display: none;">
+                <div class="window-header" onmousedown="dragWindow(event, 'email-app')">
+                    <span class="window-title">
+                        <img src="media/email.png" style="width: 30px; height: 30px; vertical-align: middle;">
+                        <span>PerceptaMail - Inbox</span>
+                    </span>
+                    <div style="display: flex; gap: 2px;">
+                        <button class="minimize-btn" onclick="minimizeWindow('email-app')">_</button>
+                        <button class="close-btn" onclick="closeEmailApp()">X</button>
+                    </div>
+                </div>
+
+                <div class="menu-bar" id="email-toolbar">
+                    <div class="menu-item" onclick="showInbox()"
+                        style="display: inline-block; cursor: pointer; width: auto;">
+                        <u>B</u>ack
+                    </div>
+                </div>
+
+                <div class="window-content"
+                    style="background: white; border: 2px inset #fff; overflow-y: auto; height: calc(100% - 25px); position: relative;">
+
+                    <div id="inbox-view" style="display: block;">
+                        <table
+                            style="table-layout: fixed; width: 100%; border-collapse: collapse; font-size: 12px; font-family: sans-serif;">
+                            <thead style="background: #e0e0e0; position: sticky; top: 0; box-shadow: 0 1px #808080;">
+                                <tr>
+                                    <th style="border: 1px solid #808080; padding: 2px; text-align: left; width: 13%;">
+                                        Time
+                                    </th>
+                                    <th style="border: 1px solid #808080; padding: 2px; text-align: left; width: 30%;">
+                                        From
+                                    </th>
+                                    <th style="border: 1px solid #808080; padding: 2px; text-align: left;">
+                                        Subject
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody id="email-table-body">
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div id="reading-view" style="display: none; padding: 15px;">
+                        <div style="border-bottom: 2px solid #c0c0c0; margin-bottom: 15px; padding-bottom: 10px;">
+                            <div style="font-size: 14px; margin-bottom: 5px;"><strong>From:</strong>
+                                <span id="view-from"></span>
+                            </div>
+                            <div style="font-size: 16px;">
+                                <strong>Subject:</strong>
+                                <span id="view-subject"></span>
+                            </div>
+                        </div>
+                        <div id="view-body" style="font-family: monospace; font-size: 13px; white-space: pre-wrap;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div id="peeps-container"
+                style="position: absolute; bottom: 70vh; right: 20px; z-index: 999999; display: none; align-items: flex-end; gap: 10px;">
+                <div id="peeps-bubble" onclick="skipPeepsSpeech()">
+                    <span id="peeps-text">Hello! I am Peeps.</span>
+                    <div id="peeps-skip-icon">▼</div>
+                </div>
+                <div
+                    style="position: relative; margin-top: 50px; margin-right: 30px; width: 15vw; flex-shrink: 0; transform-origin: bottom right; filter: drop-shadow(1px 1px 0px rgba(0,0,0,0.5));">
+
+                    <img id="peeps-avatar" src="media/olho.png" draggable="false"
+                        style="width: 100%; height: auto; display: block; image-rendering: pixelated; pointer-events: none;">
+
+                    <canvas id="peeps-hitbox"
+                        style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; pointer-events: none;"></canvas>
+                </div>
+            </div>
+
+        </div>
+
+        <div id="taskbar">
+            <button id="start-btn" onclick="toggleStartMenu()">
+                <span style="font-weight: bold; font-size: 14px; margin-left: 2px;">
+                    <img src="media/computador.png"
+                        style="width: 30px; height: 30px; vertical-align: middle; margin-right: 5px;">
+                    <span style="margin-left: -5px; margin-right: 2px;">Start</span>
+                </span>
+            </button>
+            <div id="taskbar-apps">
+            </div>
+            <div id="taskbar-clock">12:00 PM</div>
+        </div>
+
+        <div id="start-menu" style="display: none;">
+            <div class="start-menu-sidebar">
+                <span
+                    style="display: inline-block; font-size: 18px; font-weight: bold; color: white; white-space: nowrap; margin-top: auto; margin-bottom: 10px;">Percepta
+                    OS</span>
+            </div>
+            <div class="start-menu-items">
+                <div class="start-item" onclick="openWindow('tasks'); toggleStartMenu();">
+                    <img src="media/AIT.png"> AIT Task
+                </div>
+                <div class="start-item" onclick="openWindow('paint-app'); toggleStartMenu();">
+                    <img src="media/paint.png"> Paint
+                </div>
+                <div class="start-item" onclick="forceNewText(); openWindow('notepad-app'); toggleStartMenu();">
+                    <img src="media/bloco.png"> Notepad
+                </div>
+                <div class="start-item"
+                    onclick="currentPath = 'C:\\\\Users\\\\Participant'; openWindow('file-explorer'); renderFileExplorer(); toggleStartMenu();">
+                    <img src="media/pasta coisas.png" alt="Explorer"> Explorer
+                </div>
+                <div class="start-item" onclick="openEmailApp(); toggleStartMenu();">
+                    <img src="media/email.png"> Mail
+                </div>
+                <hr>
+                <div class="start-item"
+                    onclick="osAlert('Shutting down is disabled by the Administrator.', 'Error', '❌'); toggleStartMenu();">
+                    <img src="media/computador.png"> Shut Down...
+                </div>
+            </div>
+        </div>
+
+        <div id="context-menu"
+            style="display: none; position: absolute; z-index: 10000; background-color: #c0c0c0; border: 2px outset #fff; min-width: 120px; font-size: 14px;">
+        </div>
+
+
+        <div id="browser-app" class="window"
+            style="display: none; width: 600px; height: 450px; top: 50px; left: 100px;">
+            <div class="window-header" id="browser-app-header" onmousedown="dragWindow(event, 'browser-app')">
+                <span class="window-title" id="browser-title">Percepta Web</span>
+                <div style="display: flex; gap: 2px;">
+                    <button class="minimize-btn" onclick="minimizeWindow('browser-app')">_</button>
+                    <button class="close-btn" onclick="closeBrowser()">X</button>
+                </div>
+            </div>
+
+            <div class="browser-toolbar"
+                style="background: #c0c0c0; border-bottom: 2px solid #fff; padding-bottom: 5px;">
+                <div id="browser-tabs-container" style="display: flex; gap: 2px; padding: 5px 5px 0 5px;"></div>
+                <div style="display: flex; align-items: center; padding: 5px; border-top: 2px solid #dfdfdf;">
+                    <span style="margin-right: 5px; color: #000;">Link:</span>
+                    <input type="text" id="browser-address" readonly
+                        style="flex-grow: 1; padding: 2px; background: #e0e0e0; border: 2px inset #fff; color: #555; cursor: default;">
+                </div>
+            </div>
+
+            <div id="browser-content"
+                style="background: white; height: calc(100% - 85px); overflow-y: auto; border: 2px inset #fff;"></div>
+        </div>
+
+    </div>
+
+
+    <script src="https://unpkg.com/ml5@1/dist/ml5.min.js"></script>
+    <video id="video" width="320" height="240" autoplay playsinline muted style="display:none;"></video>
+
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.11.0/dist/tf.min.js"></script>
+    <script
+        src="https://cdn.jsdelivr.net/npm/@tensorflow-models/speech-commands@0.5.4/dist/speech-commands.min.js"></script>
+
+    <script src="tasks.js"></script>
+    <script src="peeps.js"></script>
+    <script src="audio.js"></script>
+    <script src="boot.js"></script>
+    <script src="fileSystem.js"></script>
+    <script src="ui.js"></script>
+    <script src="apps.js"></script>
+    <script src="vigilancia/surveillance.js"></script>
+    <script src="vigilancia/emails.js"></script>
+    <script src="internet/browser.js"></script>
+
+</body>
+
+</html>
