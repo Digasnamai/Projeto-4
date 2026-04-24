@@ -355,12 +355,12 @@ function playIntro() {
                 duration: 7000
             },
             {
-                text: "My job is to guide you through a few tasks we (AIT) developed for you!",
+                text: "My job is to guide you through a few tasks we at Percepta developed for you!",
                 face: "neutral",
                 duration: 5000
             },
             {
-                text: "Nonetheless, remember that this study is still being tested and the computer you are using was kindly lent by AIT, our wonderful company!",
+                text: "Nonetheless, remember that this study is still being tested and the computer you are using was kindly lent by Percepta, our wonderful company!",
                 face: "megaHappy",
                 duration: 8000
             },
