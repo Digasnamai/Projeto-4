@@ -236,7 +236,7 @@ function stopPanning() {
     }
 }
 
-// Eventos de Desenho (Botão esquerdo do rato)
+// desenhar (left click)
 canvas.addEventListener('mousedown', (e) => {
     if (e.button !== 0) return;
     isDrawing = true;

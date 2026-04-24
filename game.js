@@ -1,8 +1,3 @@
-//clone de flappy bird
-
-
-//recursos
-
 //audio
 const soundLoser = new Audio('media/sounds/loser.mp3');
 const soundPoint = new Audio('media/sounds/point.mp3');
@@ -24,7 +19,7 @@ birdImg2.src = 'media/olho jogo2.png';
 const pipeImg = new Image();
 pipeImg.src = 'media/colunas jogo.png';
 
-//propriedades do pássaro
+//propriedades do bird
 let bird = { 
     x: 50, 
     y: 150, 
@@ -42,7 +37,7 @@ let lastTime = 0;
 let pipeSpawnTimer = 0; //timer para novos canos
 const pipeSpawnInterval = 1.8;  //intervalo entre cada cano
 
-//subida do pássaro
+//subida do bird
 function birdFlap() {
     if (!fGameRunning) return;
     bird.velocity = bird.lift;
@@ -67,7 +62,7 @@ function startFlappyGame() {
     fCanvas.width = 400; 
     fCanvas.height = 430; 
 
-    //repõe o pássaro no centro do ecrã e limpa o score e canos
+    //repõe o bird no centro do ecrã e limpa o score e canos
     bird.y = fCanvas.height / 2;
     bird.velocity = 0;
     pipes = [];
@@ -92,9 +87,9 @@ function flappyLoop(timestamp) {
     //limpa o ecrã para redesenhar a nova frame
     fCtx.clearRect(0, 0, fCanvas.width, fCanvas.height);
 
-    //aplica as forças ao pássaro para lhe alterar a posição
+    //aplica as forças ao burd para lhe alterar a posição
     bird.velocity += bird.gravity * deltaTime; //gravidade é adicionada À velocidade
-    bird.y += bird.velocity * deltaTime; //move o pássaro
+    bird.y += bird.velocity * deltaTime; //move o bird
 
     //se a velocidade for negativa usa a imagem 2 (flap)
     let currentImg = bird.velocity < 0 ? birdImg2 : birdImg1;
@@ -103,7 +98,7 @@ function flappyLoop(timestamp) {
     //canos
     pipeSpawnTimer += deltaTime;
     if (pipeSpawnTimer >= pipeSpawnInterval) {
-        let gap = 135; //intervalo por onde o pássaro passa 
+        let gap = 135; //intervalo por onde o bird passa 
         //escolhe um altura aleatória para o espaço
         let h = Math.floor(Math.random() * (fCanvas.height - gap - 100)) + 50;
         //adiciona o cano à lista
@@ -134,7 +129,7 @@ function flappyLoop(timestamp) {
         );
 
         //colisões com os canos
-        //verifica se o pássaro tocou horizontalmente e verticalmente no cano
+        //verifica se o bird tocou horizontalmente e verticalmente no cano
         if (bird.x + bird.w - 10 > pipes[i].x && bird.x + 10 < pipes[i].x + drawWidth) {
             if (bird.y + 5 < pipes[i].top || bird.y + bird.h - 5 > fCanvas.height - pipes[i].bottom) {
                 endFlappyGame(); //game over

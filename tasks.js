@@ -76,12 +76,11 @@ function getTime() {
     return `${horas}:${minutos}:${segundos}`;
 }
 
-//loop de atualização do Log Viewer (Auto-scroll e Refresh)
+//loop de atualização do log
 setInterval(() => {
     const logWindow = document.getElementById('log-viewer-app');
     const displayArea = document.getElementById('log-viewer-content');
 
-    // Assumimos que logWindow existe
     if (logWindow.style.display !== 'none') {
         const title = document.getElementById('log-viewer-title').innerText;
 
@@ -116,7 +115,7 @@ function startAITCooldown() {
     }, 40000);
 }
 
-//chamado quando o jogador clica em "next" nas tasks
+//chamado quando o jogador clica em next nas tasks
 function nextTask() {
     const group = aitTasksData[currentTaskGroup];
     TimerdoFinal(); //reinicia o timer de inatividade
@@ -520,8 +519,24 @@ async function startVisualScanner(buttonElement, groupID, target) {
                     }
                     if (!pt) pt = pose[name] || pose[camelCase];
 
-                    let score = pt?.score ?? pt?.confidence ?? 0;
-                    return (pt && score > 0.10 && pt.y > 10) ? pt : null;
+                    let score;
+                    if (pt !== null && pt !== undefined) {
+                        if (pt.score !== null && pt.score !== undefined) {
+                            score = pt.score;
+                        } else if (pt.confidence !== null && pt.confidence !== undefined) {
+                            score = pt.confidence;
+                        } else {
+                            score = 0;
+                        }
+                    } else {
+                        score = 0;
+                    }
+
+                    if (pt && score > 0.10 && pt.y > 10) {
+                        return pt;
+                    } else {
+                        return null;
+                    }
                 };
 
                 //posições do nariz e dos braços
@@ -620,13 +635,9 @@ async function startVoiceScanner(buttonElement, targetEmotion) {
     buttonElement.disabled = true;
     statusDiv.innerHTML = "🎤 <span style='color: #000080;'>Initializing...</span>";
 
-    //vai buscar o modelo treinado que está guardado nos ficheiros locais
-    const modelPath = window.location.origin + "/modelo_voice/";
-    const checkpointURL = modelPath + "model.json";
-    const metadataURL = modelPath + "metadata.json";
-
     if (!audioClassifier) {
-        audioClassifier = speechCommands.create("BROWSER_FFT", null, checkpointURL, metadataURL);
+        const modelPath = window.location.origin + "/modelo_voice/";
+        audioClassifier = speechCommands.create("BROWSER_FFT", null, modelPath + "model.json", modelPath + "metadata.json");//é a ligação à IA do teachble machine
         await audioClassifier.ensureModelLoaded();
     }
 
@@ -650,10 +661,7 @@ async function startVoiceScanner(buttonElement, targetEmotion) {
             detectedLabelAtEnd = frameWinnerLabel;
         }
 
-        //transforma o som num espectrograma
-        if (result.spectrogram) {
-            lastAudioSpectrogram = createSpectrogramImage(result.spectrogram);
-        }
+        lastAudioSpectrogram = createSpectrogramImage(result.spectrogram);
     }, {
         probabilityThreshold: 0.55,
         includeSpectrogram: true,

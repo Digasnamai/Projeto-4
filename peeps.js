@@ -188,7 +188,7 @@ function skipPeepsSpeech() {
     if (isPeepsInterrupted) return;
 
     if (skipPeepsResolver) {
-        skipPeepsResolver(); //resolve a "Promise" de tempo
+        skipPeepsResolver(); //resolve a Promise de tempo
         skipPeepsResolver = null;
         return;
     }
@@ -223,13 +223,13 @@ function annoyPeeps() {
     if (peepsClickCount >= 5) {
         peepsClickCount = 0;
 
-        //se já estiver interrompido, ignora
+        //se já estiver interrompido ignora
         if (isPeepsInterrupted) return;
 
         const angryFaces = ["angry", "angry", "angry", "touch", "touch", "touch", "evil"];
         const randomFace = angryFaces[Math.floor(Math.random() * angryFaces.length)];
 
-        //não metemos o "true" no fim para que não seja possível saltar este diálogo com um click
+        //não metemos o true no fim para que não seja possível saltar este diálogo com um click
         if (["angry", "touch"].includes(randomFace)) {
             showPeeps("Can you stop that?", randomFace, 4000);
         } else {
@@ -259,23 +259,20 @@ async function playPeepsSequence(sequence, keepPrevious = false) {
         skipPeepsResolver = null;
     }
 
-    isPeepsInterrupted = false; // Garante que o tempo não congela
+    isPeepsInterrupted = false; //garante que o tempo não congela
 
-    // --- O FIX DA GAVETA ---
     if (keepPrevious) {
-        // Se for uma Distração (Email), guarda o guião atual na gaveta
+        //se foi imterrompido guarda a frase anterior para voltar mais tarde
         if (activeSequence && activeSequenceIndex < activeSequence.length) {
-            // Usa-se o +1 para que ele não repita a frase onde foi interrompido!
+            //usamos o +1 para que ele não repita a frase onde foi interrompido
             const remainingSteps = activeSequence.slice(activeSequenceIndex + 1);
             if (remainingSteps.length > 0) {
                 peepsSequenceStack.push(remainingSteps);
             }
         }
     } else {
-        // Se for uma mudança normal de Tarefa, limpa a gaveta de coisas antigas!
         peepsSequenceStack = [];
     }
-    // -----------------------
 
     activeSequence = sequence;
     activeSequenceIndex = 0;

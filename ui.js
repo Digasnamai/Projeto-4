@@ -6,7 +6,6 @@ function openWindow(id) {
     const win = document.getElementById(id);
     if (!win) return;
 
-    // Gestão de restrições da aplicação principal AIT
     if (id === 'tasks') {
         if (acabou) return;
 
@@ -21,20 +20,20 @@ function openWindow(id) {
         }
     }
 
-    // Tocar som de abertura se a janela estiver a abrir pela primeira vez
+    // Toca o som de abertura se a janela estiver a abrir pela primeira vez
     if (win.style.display === 'none' && id === 'tasks') {
         playSound(soundTask);
     }
 
-win.classList.remove('minimized');
+    win.classList.remove('minimized');
 
-    // Lógica específica para a aplicação de desenho
+    // Abrir o paint
     if (id === 'paint-app' && win.style.display === 'none') {
         if (!currentPaintFile) clearCanvas();
 
         // O Peeps comenta baseado no estado da aplicação de tarefas
         const aitVisible = document.getElementById('tasks')?.style.display !== 'none';
-        
+
         if (aitVisible) {
             showPeeps("Are you sure you should be drawing right now? There's still tasks to do...", "apprehensive");
         } else {
@@ -42,17 +41,18 @@ win.classList.remove('minimized');
         }
     }
 
-    // Lógica específica para a aplicação AIT
+    // Abrir o AIT
     if (id === 'tasks') {
         if (win.style.display === 'none') renderCurrentTask();
 
+        // Envia o primeiro email
         if (!aitJaFoiAberto) {
             aitJaFoiAberto = true;
             setTimeout(() => triggerNewEmail("dont_trust"), 1000);
         }
     }
 
-    // Comandos finais de exibição
+    // Atualiza a taskbar e envia a nova janela para a frente
     win.style.display = 'flex';
     updateTaskbar();
     bringToFront(win);
@@ -62,8 +62,8 @@ win.classList.remove('minimized');
 function closeWindow(id) {
     const win = document.getElementById(id);
     if (win) {
-        win.classList.remove('minimized'); 
-        win.style.display = 'none';       
+        win.classList.remove('minimized');
+        win.style.display = 'none';
         updateTaskbar();
     }
 }
@@ -73,12 +73,12 @@ function minimizeWindow(id) {
     const win = document.getElementById(id);
     if (win) {
         win.classList.add('minimized');
-        win.style.display = 'none'; 
-        updateTaskbar(); 
+        win.style.display = 'none';
+        updateTaskbar();
     }
 }
 
- // Posiciona o menu de contexto dentro dos limites do ecrã CRT
+// Posiciona o menu de contexto dentro dos limites do ecrã CRT
 function positionContextMenu(e, ctxMenu) {
     ctxMenu.style.display = 'block';
     const crt = document.getElementById('crt-container');
@@ -98,7 +98,7 @@ function positionContextMenu(e, ctxMenu) {
     if (relY + ctxMenu.offsetHeight > crtRect.height) {
         menuTop = relY - ctxMenu.offsetHeight;
     }
-    
+
     // Garante que não fica com valor negativo (fora do topo)
     if (menuTop < 0) menuTop = 0;
 
@@ -113,7 +113,7 @@ function bringToFront(element) {
 }
 
 
- //Gere o arraste das janelas dentro do contentor CRT
+//Gere o arraste das janelas dentro do contentor CRT
 function dragWindow(e, id) {
     const win = document.getElementById(id);
     if (!win) return;
@@ -166,7 +166,6 @@ function updateClock() {
 setInterval(updateClock, 1000);
 updateClock();
 
-
 function toggleStartMenu() {
     const menu = document.getElementById('start-menu');
     menu.style.display = menu.style.display === 'none' ? 'flex' : 'none';
@@ -191,8 +190,8 @@ document.addEventListener('mousedown', (e) => {
 });
 
 function resetWindowSize(win) {
-    win.style.width = ''; 
-    win.style.height = ''; 
+    win.style.width = '';
+    win.style.height = '';
 
     if (win.id === 'notepad-app') {
         win.style.width = '400px';
@@ -212,7 +211,7 @@ function resetWindowSize(win) {
 function updateTaskbar() {
     const container = document.getElementById('taskbar-apps');
     if (!container) return;
-    container.innerHTML = ''; 
+    container.innerHTML = '';
 
     document.querySelectorAll('.window').forEach(win => {
         const isOpen = win.style.display !== 'none' || win.classList.contains('minimized');
@@ -231,7 +230,7 @@ function updateTaskbar() {
             btn.onclick = () => {
                 if (win.classList.contains('minimized')) {
                     win.classList.remove('minimized');
-                    win.style.display = 'flex'; 
+                    win.style.display = 'flex';
                     bringToFront(win);
                 } else if (btn.classList.contains('active')) {
                     minimizeWindow(win.id);
@@ -282,7 +281,7 @@ bringToFront = function (element) {
 
 
 
-//Mostra diálogo "Guardar Como" pra navegar em pastas e nomear ficheiros
+//Mostra diálogo de guardar como pra navegar em pastas e nomear ficheiros
 function osSaveAs(defaultName) {
     return new Promise((resolve) => {
         const dialog = document.getElementById('save-as-dialog');
@@ -301,14 +300,13 @@ function osSaveAs(defaultName) {
         function renderList() {
             folderList.innerHTML = '';
             pathDisplay.value = navPath;
-            
+
             const folder = getFolderByPath(navPath);
             if (!folder) return;
 
             Object.entries(folder).forEach(([name, data]) => {
                 if (data.type === 'folder') {
                     const item = document.createElement('div');
-                    item.className = 'save-as-item'; // Estilo de hover no CSS
                     item.style.cursor = 'pointer';
                     item.style.padding = '2px 5px';
                     item.innerHTML = `📁 ${name}`;
@@ -359,7 +357,7 @@ function osSaveAs(defaultName) {
 
 
 
-//Exibe um diálogo personalizado (Alert,Confirm ou Prompt)
+//Exibe um diálogo de acordo com o input (Alert,Confirm ou Prompt)
 function showDialog({ type, title, message, defaultValue = "", icon = "⚠️" }) {
     return new Promise((resolve) => {
         const dialog = document.getElementById('percepta-dialog');
@@ -378,12 +376,12 @@ function showDialog({ type, title, message, defaultValue = "", icon = "⚠️" }
             inputEl.style.display = 'block';
             inputEl.value = defaultValue;
             btnCancel.style.display = 'block';
-        } 
+        }
         else if (type === 'confirm') {
             inputEl.style.display = 'none';
             btnCancel.style.display = 'block';
-        } 
-        else { 
+        }
+        else {
             inputEl.style.display = 'none';
             btnCancel.style.display = 'none';
         }
@@ -414,12 +412,12 @@ const osConfirm = (msg, title = "Confirm", icon = "❓") => showDialog({ type: '
 const osPrompt = (msg, defaultVal = "", title = "Input Required", icon = "📝") => showDialog({ type: 'prompt', message: msg, defaultValue: defaultVal, title, icon });
 
 
-const gridSize = 100; 
+const gridSize = 100;
 
 //Encontra as coordenadas livres mais próximas numa grelha para evitar sobreposição de icons
 function getNearestFreeSpot(startX, startY) {
     const occupied = new Set();
-    
+
     // Regista as posições de todos os ícones atualmente no desktop
     document.querySelectorAll('.desktop-icon').forEach(i => {
         occupied.add(`${parseInt(i.style.left || 0)},${parseInt(i.style.top || 0)}`);
@@ -432,11 +430,16 @@ function getNearestFreeSpot(startX, startY) {
     while (queue.length > 0) {
         const { x, y } = queue.shift();
 
-        // Se a posição atual não estiver ocupada devolve a
+        // Se a posição atual não estiver ocupada devolve-a
         if (!occupied.has(`${x},${y}`)) return { x, y };
 
         // Define direções de busca (Cima,Baixo,Direita,Esquerda)
-        const directions = [{ dx: 0, dy: -gridSize }, { dx: 0, dy: gridSize }, { dx: gridSize, dy: 0 }, { dx: -gridSize, dy: 0 }];
+        const directions = [
+            { dx: 0, dy: -gridSize }, 
+            { dx: 0, dy: gridSize }, 
+            { dx: gridSize, dy: 0 }, 
+            { dx: -gridSize, dy: 0 }
+        ];
 
         for (const d of directions) {
             const nx = x + d.dx;
@@ -452,12 +455,12 @@ function getNearestFreeSpot(startX, startY) {
             }
         }
     }
-    return { x: startX + gridSize, y: startY + gridSize }; // Fallback de emergência
+    return { x: startX + gridSize, y: startY + gridSize }; // Fallback
 }
 
 
 
-//Move um ficheiro para dentro de uma pasta.
+//Move um ficheiro para dentro de uma pasta
 async function handleDropIntoFolder(targetFolderName, draggedFileName) {
     // Impede mover um ficheiro para ele próprio/se o nome for inválido
     if (!draggedFileName || draggedFileName === targetFolderName) return;
@@ -480,7 +483,7 @@ async function handleDropIntoFolder(targetFolderName, draggedFileName) {
     // atualiza
     saveVFS();
     renderFileExplorer();
-    renderDesktop(); 
+    renderDesktop();
 }
 
 
@@ -500,11 +503,11 @@ function setupIconDrag(icon, vfsName = null) {
         function onMouseMove(event) {
             // Remove seleção de texto para o movimento ser limpo
             window.getSelection().removeAllRanges();
-            
+
             let x = event.clientX - desktop.left - shiftX;
             let y = event.clientY - desktop.top - shiftY;
-            
-            // Impede que o ícone saia pelas bordas superiores
+
+            // Impede que o icon saia pelas bordas superiores
             icon.style.left = (x < 0 ? 0 : x) + 'px';
             icon.style.top = (y < 0 ? 0 : y) + 'px';
         }
@@ -587,15 +590,15 @@ function setupIconDrag(icon, vfsName = null) {
             const df = getFolderByPath("C:\\Users\\Participant\\Desktop");
             if (df[vfsName] && df[vfsName].type !== 'locked_folder') {
                 ctxMenu.appendChild(document.createElement('hr'));
-                
+
                 addOption('Copy', () => {
                     vfsClipboard = { action: 'copy', path: "C:\\Users\\Participant\\Desktop", name: vfsName, data: JSON.parse(JSON.stringify(df[vfsName])) };
                 });
-                
+
                 addOption('Cut', () => {
                     vfsClipboard = { action: 'cut', path: "C:\\Users\\Participant\\Desktop", name: vfsName, data: df[vfsName] };
                 });
-                
+
                 addOption('Delete', async () => {
                     if (await osConfirm(`Move "${vfsName}" to the Recycle Bin?`, "Confirm Delete", "🗑️")) {
                         moveToTrash("C:\\Users\\Participant\\Desktop", vfsName, df[vfsName]);
@@ -694,7 +697,7 @@ async function executePaste(targetPath, mouseX = null, mouseY = null) {
     let pastedData = JSON.parse(JSON.stringify(vfsClipboard.data));
     let finalName = vfsClipboard.name;
 
-    // CASO ESPECIAL MOVER NO MESMO DESTINO (cut)
+    // Paste no mesmo sítio
     if (targetPath === vfsClipboard.path && vfsClipboard.action === 'cut') {
         if (targetPath === "C:\\Users\\Participant\\Desktop" && mouseX !== null) {
             const desktopRect = document.getElementById('desktop').getBoundingClientRect();
@@ -708,11 +711,12 @@ async function executePaste(targetPath, mouseX = null, mouseY = null) {
             saveVFS();
         }
         vfsClipboard = null;
-        renderDesktop(); renderFileExplorer();
+        renderDesktop(); 
+        renderFileExplorer();
         return;
     }
 
-    // renomear (copy no msmo destino)
+    // renomear (copy and paste no msmo destino)
     if (targetPath === vfsClipboard.path && vfsClipboard.action === 'copy') {
         let baseName = finalName;
         let ext = "";
@@ -731,7 +735,7 @@ async function executePaste(targetPath, mouseX = null, mouseY = null) {
         }
     }
 
-    // verificar sobreposiçao
+    // verificar se existe um ficheiro com o mesmo nome
     if (targetFolder[finalName]) {
         const isSure = await osConfirm(`A file named "${finalName}" already exists here.\nOverwrite?`, "Confirm", "⚠️");
         if (!isSure) {
@@ -744,11 +748,11 @@ async function executePaste(targetPath, mouseX = null, mouseY = null) {
     // posicionamento do desktop
     if (targetPath === "C:\\Users\\Participant\\Desktop") {
         const desktopRect = document.getElementById('desktop').getBoundingClientRect();
-        
+
         // Define as coordenadas iniciais baseadas no clique ou valor padrão
         let startX = mouseX ? Math.round((mouseX - desktopRect.left) / gridSize) * gridSize : 20;
         let startY = mouseY ? Math.round((mouseY - desktopRect.top) / gridSize) * gridSize : 20;
-        
+
         let spot = getNearestFreeSpot(startX || 20, startY || 20);
         pastedData.x = spot.x;
         pastedData.y = spot.y;
@@ -803,14 +807,14 @@ function renderDesktop() {
 
         const iconDiv = document.createElement('div');
         iconDiv.className = 'desktop-icon vfs-desktop-icon';
-        iconDiv.setAttribute('data-vfs-name', name); 
+        iconDiv.setAttribute('data-vfs-name', name);
 
         // Posicionamento - usa o gravado ou encontra um lugar livre
         let left = data.x, top = data.y;
         if (!left || !top) {
             let spot = getNearestFreeSpot(20, 20);
-            left = data.x = spot.x; 
-            top = data.y = spot.y; 
+            left = data.x = spot.x;
+            top = data.y = spot.y;
             saveVFS();
         }
 

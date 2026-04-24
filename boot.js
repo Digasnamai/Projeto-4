@@ -72,7 +72,7 @@ window.addEventListener('load', () => {
     // ao premir boot up
     startBtn.onclick = () => {
         bootMenu.style.display = 'none'; //esconde o menu
-        terminal.style.display = 'block'; //dá display ao ecrâ de texto
+        terminal.style.display = 'block'; //dá display ao ecrã de texto
 
         let currentLine = 0;
 
@@ -83,12 +83,12 @@ window.addEventListener('load', () => {
             if (currentLine < bootSequence.length) {
                 let textLine = bootSequence[currentLine];
 
-                terminal.innerHTML += textLine + "\n"; //adiciona a linha ao ecrã
+                terminal.innerHTML += textLine + "\n"; //adiciona a linha ao ecra
                 currentLine++; //linha seguinte
 
                 let delay = 40; //delay default
 
-                //delay's especiais para simular o computador a processar
+                //delays especiais para simular o computador a processar
                 if (textLine.includes('Initializing') || textLine.includes('Loading')) delay = 800;
                 if (textLine === "SYSTEM IS READY.") delay = 1200;
                 if (textLine.trim() === "") delay = 200;

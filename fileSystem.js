@@ -106,11 +106,11 @@ function clearExplorerSelection(containerId = 'explorer-file-list') {
     if (containerId === 'explorer-file-list') selectedFileName = null;
 }
 
-//botão "Up" na janela
+//botão up na janela
 function goUpDirectory() {
     if (currentPath === "C:") return; //não deixa subir do C:
     let parts = currentPath.split('\\');
-    parts.pop();    //remove a última pasta do path
+    parts.pop();//remove a última pasta do path
     currentPath = parts.join('\\');
     renderFileExplorer();
 }
@@ -287,7 +287,7 @@ function renderFileExplorer() {
     });
 }
 const explorerList = document.getElementById('explorer-file-list');
-//configurações da janela do Explorador
+//configurações da janela do explorador
 if (explorerList) {
     explorerList.onclick = clearExplorerSelection;
 
