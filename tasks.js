@@ -112,7 +112,7 @@ function startAITCooldown() {
             renderCurrentTask();
             openWindow('tasks');
         }
-    }, 40000);
+    }, 2000);
 }
 
 //chamado quando o jogador clica em next nas tasks
@@ -473,6 +473,7 @@ async function startVisualScanner(buttonElement, groupID, target) {
     statusDiv.innerHTML = "<span style='color: #000080;'>Loading...</span>";
 
     //carrega o modelo do ml5 dependendo da Tarefa
+    await tf.ready();
     if (groupID === 'pose') {
         activeScannerModel = await ml5.bodyPose(hiddenVideo);
     } else if (groupID === 'face') {
@@ -636,8 +637,18 @@ async function startVoiceScanner(buttonElement, targetEmotion) {
     statusDiv.innerHTML = "🎤 <span style='color: #000080;'>Initializing...</span>";
 
     if (!audioClassifier) {
-        const modelPath = "./modelo_voice/";
-        audioClassifier = speechCommands.create("BROWSER_FFT", null, modelPath + "model.json", modelPath + "metadata.json");//é a ligação à IA do teachble machine
+        let basePath = window.location.href.split('#')[0].split('?')[0]; 
+        
+        if (basePath.endsWith('.html')) {
+            basePath = basePath.substring(0, basePath.lastIndexOf('/'));
+        }
+        if (!basePath.endsWith('/')) {
+            basePath += '/';
+        }
+        
+        const modelPath = basePath + "modelo_voice/";
+        
+        audioClassifier = speechCommands.create("BROWSER_FFT", null, modelPath + "model.json", modelPath + "metadata.json");
         await audioClassifier.ensureModelLoaded();
     }
 

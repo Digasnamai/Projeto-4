@@ -11,6 +11,9 @@ let faceDetector;
 let video;
 
 async function initSurveillance() {
+    await tf.setBackend('webgl');
+    await tf.ready();
+    
     video = document.getElementById("video");
 
     const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });//pra pedir permissão pra usar a camara e o micro
