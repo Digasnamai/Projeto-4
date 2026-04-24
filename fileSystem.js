@@ -10,12 +10,7 @@ const defaultFS = {
                         type: "folder",
                         children: {
                             "Desktop": { type: "folder", children: {} },
-                            "Documents": {
-                                type: "folder",
-                                children: {
-                                    "Secret": { type: "folder", children: {} }
-                                }
-                            }
+                            "Documents": { type: "folder",children: {} }
                         }
                     }
                 }
