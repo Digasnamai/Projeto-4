@@ -636,7 +636,7 @@ async function startVoiceScanner(buttonElement, targetEmotion) {
     statusDiv.innerHTML = "🎤 <span style='color: #000080;'>Initializing...</span>";
 
     if (!audioClassifier) {
-        const modelPath = window.location.origin + "/modelo_voice/";
+        const modelPath = "./modelo_voice/";
         audioClassifier = speechCommands.create("BROWSER_FFT", null, modelPath + "model.json", modelPath + "metadata.json");//é a ligação à IA do teachble machine
         await audioClassifier.ensureModelLoaded();
     }
