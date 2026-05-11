@@ -162,9 +162,9 @@
 
             </div>
 
-            <div class="desktop-icon" style="top: 20px; left: 120px;" ondblclick="openWindow('flappy-app')">
-                <img src="media/jogo.png" alt="Game">
-                <span>Bird.exe</span>
+            <div class="desktop-icon" style="top: 20px; left: 120px;" ondblclick="currentPath = 'C:\\\\Users\\\\Participant\\\\Games'; openWindow('file-explorer'); renderFileExplorer();">
+                <img src="media/pasta.png" alt="Games">
+                <span>Games</span>
             </div>
 
             <div class="window" id="notepad-app"
@@ -339,25 +339,42 @@
                 </div>
             </div>
 
-            <div class="window" id="flappy-app"
-                style="top: 80px; left: 200px; width: 400px; height: 425px; display: none;">
+            <div class="window" id="flappy-app" style="top: 80px; left: 200px; width: 400px; height: 455px; display: none;">
                 <div class="window-header" onmousedown="dragWindow(event, 'flappy-app')">
                     <span class="window-title">
                         <img src="media/jogo.png" style="width: 30px; height: 30px; vertical-align: middle;">
-                        <span>Percepta Bird</span>
+                        <span>Bird.exe</span>
                     </span>
                     <div style="display: flex; gap: 2px;">
                         <button class="minimize-btn" onclick="minimizeWindow('flappy-app')">_</button>
                         <button class="close-btn" onclick="closeWindow('flappy-app')">X</button>
                     </div>
                 </div>
-                <div class="window-content" id="flappy-container">
-                    <canvas id="flappy-canvas"></canvas>
-
-                    <div id="flappy-overlay"
-                        style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(0,0,0,0.4); color: white; text-align: center;">
+                <div class="window-content" id="flappy-container" style="position: relative; padding: 0; background: #808080;">
+                    <canvas id="flappy-canvas" width="400" height="430" style="display: block;"></canvas>
+                    <div id="flappy-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(0,0,0,0.6); color: white; text-align: center;">
                         <h1 id="flappy-msg" style="margin-bottom: 10px; font-size: 20px;">PERCEPTA BIRD</h1>
                         <button class="btn-retro" onclick="startFlappyGame()" style="padding: 10px 20px;">START</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="window" id="minesweeper-app" style="top: 100px; left: 220px; width: 400px; height: 455px; display: none;">
+                <div class="window-header" onmousedown="dragWindow(event, 'minesweeper-app')">
+                    <span class="window-title">
+                        <img src="media/jogo.png" style="width: 30px; height: 30px; vertical-align: middle;">
+                        <span>Minesweeper.exe</span>
+                    </span>
+                    <div style="display: flex; gap: 2px;">
+                        <button class="minimize-btn" onclick="minimizeWindow('minesweeper-app')">_</button>
+                        <button class="close-btn" onclick="closeWindow('minesweeper-app')">X</button>
+                    </div>
+                </div>
+                <div class="window-content" style="position: relative; padding: 0; background: #808080;">
+                    <canvas id="minesweeper-canvas" width="400" height="430" style="display: block;"></canvas>
+                    <div id="minesweeper-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(0,0,0,0.6); color: white; text-align: center;">
+                        <h1 id="minesweeper-msg" style="margin-bottom: 10px; font-size: 20px;">MINESWEEPER</h1>
+                        <button class="btn-retro" onclick="startMinesweeper()" style="padding: 10px 20px;">START</button>
                     </div>
                 </div>
             </div>

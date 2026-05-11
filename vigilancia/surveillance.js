@@ -510,7 +510,7 @@ async function promptLogPassword() {
     } else {
         showPeeps("STOP! YOU'RE NOT ALLOWED TO SEE THOSE.", "evil", 5000);
     }
-    const input = await osPrompt("Insira a palavra-passe do Administrador para aceder ao log:", "", "Acesso Restrito", "🔒");
+    const input = await osPrompt("Insert password to access log:", "", "Restricted access", "🔒");
 
     if (input === password) {
         const folder = document.getElementById('folder-logs');
@@ -518,7 +518,7 @@ async function promptLogPassword() {
         showPeeps("YOU WILL REGRET SEEING THEM.", "evil", 5000);
         renderLogExplorer();
     } else {
-        await osAlert("Acesso Negado. Tente novamente.", "Erro de Autenticação", "❌");
+        await osAlert("Access denied. Try again.", "Authentication error", "❌");
     }
 }
 

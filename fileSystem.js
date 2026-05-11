@@ -10,7 +10,7 @@ const defaultFS = {
                         type: "folder",
                         children: {
                             "Desktop": { type: "folder", children: {} },
-                            "Documents": { type: "folder",children: {} }
+                            "Documents": { type: "folder", children: {} }
                         }
                     }
                 }
@@ -27,6 +27,24 @@ let vfsClipboard = null; //clipboard de copiar e cortar
 
 //Garante que pastas essenciais não desaparecem
 let participantDir = vfs["C:"].children["Users"].children["Participant"].children;
+
+//garante que os jogos existem
+if (participantDir["Desktop"].children["Games"]) {
+    delete participantDir["Desktop"].children["Games"];
+    saveVFS();
+}
+
+// 2. Cria a pasta Games como uma pasta de Sistema (fora do Desktop)
+if (!participantDir["Games"]) {
+    participantDir["Games"] = {
+        type: "folder",
+        children: {
+            "Bird.exe": { type: "exe", action: "flappy" },
+            "Minesweeper.exe": { type: "exe", action: "minesweeper" }
+        }
+    };
+    saveVFS();
+}
 
 //garante que o desktop existe
 if (!participantDir["Desktop"]) {
@@ -103,15 +121,20 @@ function clearExplorerSelection(containerId = 'explorer-file-list') {
 
 //botão up na janela
 function goUpDirectory() {
-    if (currentPath === "C:") return; //não deixa subir do C:
-    let parts = currentPath.split('\\');
-    parts.pop();//remove a última pasta do path
-    currentPath = parts.join('\\');
+    let parts = currentPath.split('\\').filter(p => p !== '');
+    if (parts.length <= 1) {
+        currentPath = "C:"; //não deixa subir do C:
+    } else {
+        parts.pop(); //remove a última pasta do path
+        currentPath = parts.join('\\');
+    }
+    
     renderFileExplorer();
 }
 
 //função que desenha as pastas e ficheiros na janela do Explorador
 function renderFileExplorer() {
+    currentPath = currentPath.split('\\').filter(p => p !== '').join('\\');
     const fileList = document.getElementById('explorer-file-list');
     const addressBar = document.getElementById('explorer-address');
     if (!fileList) return;
@@ -200,7 +223,7 @@ function renderFileExplorer() {
                 optDeletePerm.onclick = () => { ctxMenu.style.display = 'none'; deleteSelectedFile(); };
                 ctxMenu.appendChild(optDeletePerm);
 
-            //bloqueia alterar pastas importantes
+                //bloqueia alterar pastas importantes
             } else if (!isSystemFolder) {
                 //context menu para ficheiros restantes
                 ctxMenu.appendChild(document.createElement('hr'));
@@ -276,6 +299,12 @@ function renderFileExplorer() {
         } else if (data.type === 'text') {
             fileDiv.innerHTML = `<img src="media/bloco.png" alt="Text" style="width: 32px; height: 32px; margin-bottom: 5px;"><span>${name}</span>`;
             fileDiv.ondblclick = () => openTextFile(name, data.content);
+        } else if (data.type === 'exe') {
+            fileDiv.innerHTML = `<img src="media/jogo.png" alt="Game" style="width: 32px; height: 32px; margin-bottom: 5px;"><span>${name}</span>`;
+            fileDiv.ondblclick = () => {
+                if (data.action === 'flappy') openWindow('flappy-app');
+                else if (data.action === 'minesweeper') openWindow('minesweeper-app');
+            };
         }
 
         fileList.appendChild(fileDiv);
@@ -294,36 +323,46 @@ if (explorerList) {
         const ctxMenu = document.getElementById('context-menu');
         ctxMenu.innerHTML = '';
 
-        //novo txt
-        const optNewText = document.createElement('div');
-        optNewText.innerText = 'New Text Document';
-        optNewText.onclick = () => { ctxMenu.style.display = 'none'; createNewTextFile(); };
-        ctxMenu.appendChild(optNewText);
+        //se estivernos no caixote do lixo mostra apenas a opção de esvaziar
+        if (currentPath.includes("Trash")) {
+            const optEmpty = document.createElement('div');
+            optEmpty.innerText = 'Empty Recycle Bin';
+            optEmpty.onclick = () => { ctxMenu.style.display = 'none'; emptyTrashFolder(); };
+            ctxMenu.appendChild(optEmpty);
+        }
+        else {
+            //novo txt
+            const optNewText = document.createElement('div');
+            optNewText.innerText = 'New Text Document';
+            optNewText.onclick = () => { ctxMenu.style.display = 'none'; createNewTextFile(); };
+            ctxMenu.appendChild(optNewText);
 
-        //novo paint file
-        const optNewPaint = document.createElement('div');
-        optNewPaint.innerText = 'New Paint File';
-        optNewPaint.onclick = () => { ctxMenu.style.display = 'none'; createNewPaintFile(); };
-        ctxMenu.appendChild(optNewPaint);
+            //novo paint file
+            const optNewPaint = document.createElement('div');
+            optNewPaint.innerText = 'New Paint File';
+            optNewPaint.onclick = () => { ctxMenu.style.display = 'none'; createNewPaintFile(); };
+            ctxMenu.appendChild(optNewPaint);
 
-        //nova pasta
-        const optNewFolder = document.createElement('div');
-        optNewFolder.innerText = 'New Folder';
-        optNewFolder.onclick = () => { ctxMenu.style.display = 'none'; createNewFolder(); };
-        ctxMenu.appendChild(optNewFolder);
+            //nova pasta
+            const optNewFolder = document.createElement('div');
+            optNewFolder.innerText = 'New Folder';
+            optNewFolder.onclick = () => { ctxMenu.style.display = 'none'; createNewFolder(); };
+            ctxMenu.appendChild(optNewFolder);
 
-        //se houver algo no clipboard permite dar paste nesta pasta
-        if (vfsClipboard) {
-            ctxMenu.appendChild(document.createElement('hr'));
-            const optPaste = document.createElement('div');
-            optPaste.innerText = 'Paste';
-            optPaste.onclick = () => {
-                ctxMenu.style.display = 'none';
-                executePaste(currentPath);
-            };
-            ctxMenu.appendChild(optPaste);
+            //se houver algo no clipboard permite dar paste nesta pasta
+            if (vfsClipboard) {
+                ctxMenu.appendChild(document.createElement('hr'));
+                const optPaste = document.createElement('div');
+                optPaste.innerText = 'Paste';
+                optPaste.onclick = () => {
+                    ctxMenu.style.display = 'none';
+                    executePaste(currentPath);
+                };
+                ctxMenu.appendChild(optPaste);
+            }
         }
         positionContextMenu(e, ctxMenu);
+
     };
 }
 
@@ -334,7 +373,7 @@ async function createNewTextFile() {
     if (!fileName.endsWith('.txt')) fileName += '.txt';
 
     let currentFolder = getFolderByPath(currentPath);
-    if (await checkFileExists(currentFolder, folderName)) return;
+    if (await checkFileExists(currentFolder, fileName)) return;
 
     currentFolder[fileName] = { type: "text", content: "" };
     refreshVFS();
@@ -355,7 +394,7 @@ async function createNewPaintFile() {
     const tempCtx = tempCanvas.getContext('2d');
     tempCtx.fillStyle = "white";
     tempCtx.fillRect(0, 0, 400, 300);
-    
+
     currentFolder[fileName] = { type: "image", content: tempCanvas.toDataURL('image/png') };
     refreshVFS();
 }
@@ -441,6 +480,31 @@ function moveToTrash(sourcePath, fileName, fileData) {
 
     playSound(soundTrash);  //dá play ao sound effect do lixo
     refreshVFS();
+}
+
+async function emptyTrashFolder() {
+    let trashFolder = getFolderByPath("C:\\Trash");
+    const filesInTrash = Object.keys(trashFolder);
+
+    //se já estiver vazio, avisa o utilizador
+    if (filesInTrash.length === 0) {
+        await osAlert("The Recycle Bin is already empty.", "Recycle Bin", "🗑️");
+        return;
+    }
+
+    //pede confirmação
+    const isSure = await osConfirm(`Are you sure you want to permanently delete all ${filesInTrash.length} items?`, "Empty Recycle Bin");
+
+    if (isSure) {
+        for (let file of filesInTrash) {
+            delete trashFolder[file]; //apaga os ficheiro um a um
+        }
+
+        refreshVFS();
+        if (typeof updateTrashIcon === 'function') {
+            updateTrashIcon();
+        }
+    }
 }
 
 //se o lixo tiver algum item altera o icone

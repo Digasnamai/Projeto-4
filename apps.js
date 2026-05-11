@@ -332,3 +332,47 @@ async function tryClosePaint() {
     clearCanvas();
     closeWindow('paint-app');
 }
+
+//context menus nos items de desktop
+window.addEventListener('load', () => {
+    //procura todos os ícones do ambiente de trabalho
+    const desktopIcons = document.querySelectorAll('.desktop-icon');
+    
+    desktopIcons.forEach(icon => {
+        //se o ícone ainda não tiver um menu de clique direito
+        if (!icon.oncontextmenu) {
+            icon.oncontextmenu = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const ctxMenu = document.getElementById('context-menu');
+                ctxMenu.innerHTML = ''; 
+                
+                //cria a opção "Open"
+                const optOpen = document.createElement('div');
+                optOpen.innerText = 'Open';
+                optOpen.style.padding = '5px 10px';
+                optOpen.style.cursor = 'pointer';
+                
+                //quando clicar em "Open", simula o double click
+                optOpen.onclick = () => {
+                    ctxMenu.style.display = 'none';
+                    if (icon.ondblclick) {
+                        icon.ondblclick(e);
+                    }
+                };
+                
+                ctxMenu.appendChild(optOpen);
+                
+                //abre o menu na posição do rato
+                if (typeof positionContextMenu === 'function') {
+                    positionContextMenu(e, ctxMenu);
+                } else {
+                    ctxMenu.style.left = e.pageX + 'px';
+                    ctxMenu.style.top = e.pageY + 'px';
+                    ctxMenu.style.display = 'block';
+                }
+            };
+        }
+    });
+});

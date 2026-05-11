@@ -108,3 +108,22 @@ window.addEventListener('load', () => {
         }, 2000); //fica parado na última linha de "WELCOME, PARTICIPANT." por 2 segundos
     }
 });
+
+let inactivityTimer;
+const TIME_LIMIT = 3 * 60 * 1000; //3 minutos
+
+//dá reload à página
+function resetSystem() {
+    window.location.reload();
+}
+
+//recomeça a contagem do zero
+function resetInactivityTimer() {
+    clearTimeout(inactivityTimer);
+    inactivityTimer = setTimeout(resetSystem, TIME_LIMIT);
+}
+
+//verifica qualquer interação do utilizador para dar reset ao cronómetro
+document.onmousemove = resetInactivityTimer;
+document.onmousedown = resetInactivityTimer; 
+document.onkeydown = resetInactivityTimer;
