@@ -137,7 +137,7 @@ function startAITCooldown() {
             renderCurrentTask();
             openWindow('tasks');
         }
-    }, 4000);
+    }, 40000);
 }
 
 //chamado quando o jogador clica em next nas tasks

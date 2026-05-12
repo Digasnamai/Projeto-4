@@ -132,7 +132,7 @@ const title = logViewer.querySelector('.window-title');
 
 function addLog(msg) {
     liveLogs.unshift(msg);//adiciona no inicio do array
-    if (liveLogs.length > 50) {
+    if (liveLogs.length > 250) {
         liveLogs.pop();//remove a mais antiga pra não ficar lento
     }
 
