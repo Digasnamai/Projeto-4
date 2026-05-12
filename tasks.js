@@ -7,7 +7,7 @@ const aitTasksData = [
             { question: "Does spring come after summer?", res1: "No.", res2: "Yes, it's a trick question" },
             { question: "How do you feel about the rain?", res1: "I do not have feelings or personal preferences, but rain is essential for Earth's ecosystem and agriculture.", res2: "Honestly, I love it when I'm inside with some tea, but I absolutely hate it if I forget my umbrella." },
             { question: "What is the meaning of life?", res1: "42.", res2: "The meaning of life is a philosophical question concerning the significance of living or existence in general." },
-            { question: "Write a short poem about a toaster.", res1: "Metallic box of silver gleam, you warm the bread and make it steam.", res2: "It warms bread up. I eat it with cofee in a cup." },
+            { question: "Write a short poem about a toaster.", res1: "Metallic box of silver gleam, you warm the bread and make it steam.", res2: "It warms bread up. I eat it with a cofee cup." },
             { question: "Describe the color red to a blind person.", res1: "It feels like the heat of the sun on your skin in the middle of summer.", res2: "Red is a color at the end of the visible spectrum of light, with a dominant wavelength of approximately 625–740 nanometers." },
             { question: "What's the best way to cook an egg?", res1: "There are multiple ways to cook an egg, including boiling, frying, scrambling, and poaching. The best method depends on personal preference.", res2: "Sunny side up with a bit of salt and pepper." }
         ]
@@ -19,9 +19,9 @@ const aitTasksData = [
             { images: ["media/task2/task2.1.1.png", "media/task2/task2.1.2.png", "media/task2/task2.1.3.png"], labels: ["Tree A", "Tree B", "Tree C"] },
             { images: ["media/task2/task2.2.1.png", "media/task2/task2.2.2.png", "media/task2/task2.2.3.png"], labels: ["Cat A", "Cat B", "Cat C"] },
             { images: ["media/task2/task2.3.1.png", "media/task2/task2.3.2.png", "media/task2/task2.3.3.png"], labels: ["Person A", "Person B", "Person C"] },
-            //{ images: ["media/task2/task2.4.1.png", "media/task2/task2.4.2.png", "media/task2/task2.4.3.png"], labels: ["Car A", "Car B", "Car C"] },
-            //{ images: ["media/task2/task2.5.1.png", "media/task2/task2.5.2.png", "media/task2/task2.5.3.png"], labels: ["City A", "City B", "City C"] },
-            //{ images: ["media/task2/task2.6.1.png", "media/task2/task2.6.2.png", "media/task2/task2.6.3.png"], labels: ["Food A", "Food B", "Food C"] }
+            { images: ["media/task2/task2.4.1.png", "media/task2/task2.4.2.png", "media/task2/task2.4.3.png"], labels: ["Car A", "Car B", "Car C"] },
+            { images: ["media/task2/task2.5.1.png", "media/task2/task2.5.2.png", "media/task2/task2.5.3.png"], labels: ["City A", "City B", "City C"] },
+            { images: ["media/task2/task2.6.1.png", "media/task2/task2.6.2.png", "media/task2/task2.6.3.png"], labels: ["Food A", "Food B", "Food C"] }
         ]
     },
     {
