@@ -184,28 +184,45 @@ function endFlappyGame() {
 //minesweeper
 const mCanvas = document.getElementById('minesweeper-canvas');
 const mCtx = mCanvas ? mCanvas.getContext('2d') : null;
-const mOverlay = document.getElementById('minesweeper-overlay');
-const mMsg = document.getElementById('minesweeper-msg');
+const mOverlay = document.getElementById('minesweeper-overlay'); 
+const mMsg = document.getElementById('minesweeper-msg');         
 
 const M_COLS = 10;
 const M_ROWS = 10;
-const M_CELL = 40;
-const M_TOP = 30; // Espaço no topo para o contador
-const M_MINES = 15; // Quantidade de bombas
+const M_CELL = 36;
+const M_MINES = 15;
+
+const MARGIN_X = 20;
+const MARGIN_Y = 15;
+const HEADER_H = 45;
+const GAP = 10;
+const GRID_TOP = MARGIN_Y + HEADER_H + GAP;
+const GRID_W = M_COLS * M_CELL;
+const GRID_H = M_ROWS * M_CELL;
 
 let mGrid = [];
 let mRunning = false;
 let mFlags = 0;
 let mRevealed = 0;
+let mFace = "🙂";
+let mTimer = 0;
+let mTimerInterval = null;
+let mFirstClick = true; //o timer só começa quando clicamos pela 1ª vez
 
 function startMinesweeper() {
     if (!mCanvas) return;
     mRunning = true;
     mFlags = 0;
     mRevealed = 0;
+    mFace = "🙂";
     mOverlay.style.display = 'none';
+    
+    //reset ao timer
+    clearInterval(mTimerInterval);
+    mTimer = 0;
+    mFirstClick = true;
 
-    mCanvas.oncontextmenu = (e) => e.preventDefault(); // Bloqueia menu direito
+    mCanvas.oncontextmenu = (e) => e.preventDefault();
 
     createMinesweeperGrid();
     drawMinesweeperBoard();
@@ -246,22 +263,41 @@ function createMinesweeperGrid() {
     }
 }
 
+//clicks
 if (mCanvas) {
     mCanvas.addEventListener('mousedown', (e) => {
-        if (!mRunning) return;
-
         const rect = mCanvas.getBoundingClientRect();
         const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top - M_TOP;
+        const y = e.clientY - rect.top;
 
-        if (y < 0) return;
+        //clique no smiley
+        let btnX = MARGIN_X + (GRID_W / 2) - 18;
+        let btnY = MARGIN_Y + 5;
+        if (x >= btnX && x <= btnX + 36 && y >= btnY && y <= btnY + 36) {
+            startMinesweeper(); 
+            return;
+        }
 
-        const c = Math.floor(x / M_CELL);
-        const r = Math.floor(y / M_CELL);
+        if (!mRunning) return;
 
-        if (r >= 0 && r < M_ROWS && c >= 0 && c < M_COLS) {
-            if (e.button === 0) revealMinesweeperCell(r, c); // Esquerdo
-            else if (e.button === 2) toggleMinesweeperFlag(r, c); // Direito
+        //clique na grelha
+        if (x >= MARGIN_X && x < MARGIN_X + GRID_W && y >= GRID_TOP && y < GRID_TOP + GRID_H) {
+            const c = Math.floor((x - MARGIN_X) / M_CELL);
+            const r = Math.floor((y - GRID_TOP) / M_CELL);
+
+            // Inicia o cronómetro no 1º clique
+            if (mFirstClick && e.button === 0) {
+                mFirstClick = false;
+                mTimerInterval = setInterval(() => {
+                    if (mRunning && mTimer < 999) {
+                        mTimer++;
+                        drawMinesweeperBoard(); //atualiza apenas para mostrar o tempo
+                    }
+                }, 1000);
+            }
+
+            if (e.button === 0) revealMinesweeperCell(r, c); //esquerdo
+            else if (e.button === 2) toggleMinesweeperFlag(r, c); //direito
             drawMinesweeperBoard();
         }
     });
@@ -272,7 +308,7 @@ function toggleMinesweeperFlag(r, c) {
     if (cell.isRevealed) return;
     cell.isFlagged = !cell.isFlagged;
     mFlags += cell.isFlagged ? 1 : -1;
-    playSound(soundPoint);
+    if (typeof soundPoint !== 'undefined') playSound(soundPoint);
 }
 
 function revealMinesweeperCell(r, c) {
@@ -281,8 +317,8 @@ function revealMinesweeperCell(r, c) {
 
     cell.isRevealed = true;
     mRevealed++;
-
-    playSound(soundFlap);
+    
+    if (typeof soundFlap !== 'undefined') playSound(soundFlap);
 
     if (cell.isMine) {
         endMinesweeper(false);
@@ -301,79 +337,394 @@ function revealMinesweeperCell(r, c) {
     if (mRevealed === (M_ROWS * M_COLS) - M_MINES) endMinesweeper(true);
 }
 
+//bordas
+function drawInsetBorder(ctx, x, y, w, h, size) {
+    ctx.fillStyle = "#808080";
+    ctx.fillRect(x, y, w, size);
+    ctx.fillRect(x, y, size, h);
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(x, y + h - size, w, size);
+    ctx.fillRect(x + w - size, y, size, h);
+}
+
+function drawOutsetBorder(ctx, x, y, w, h, size) {
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(x, y, w, size); 
+    ctx.fillRect(x, y, size, h); 
+    ctx.fillStyle = "#808080";
+    ctx.fillRect(x, y + h - size, w, size); 
+    ctx.fillRect(x + w - size, y, size, h); 
+}
+
+function drawDigitalDisplay(ctx, x, y, value) {
+    ctx.fillStyle = "black";
+    ctx.fillRect(x, y, 60, 32);
+    drawInsetBorder(ctx, x, y, 60, 32, 1);
+    
+    ctx.fillStyle = "#4a0000"; 
+    ctx.font = "bold 26px 'Courier New', monospace"; 
+    ctx.textAlign = "right";
+    ctx.textBaseline = "top";
+    ctx.fillText("888", x + 55, y + 4);
+    
+    ctx.fillStyle = "#ff0000";
+    let valStr = Math.max(0, Math.min(999, value)).toString().padStart(3, '0');
+    ctx.fillText(valStr, x + 55, y + 4);
+}
+
+//visuais
 function drawMinesweeperBoard() {
     mCtx.fillStyle = "#c0c0c0";
     mCtx.fillRect(0, 0, mCanvas.width, mCanvas.height);
 
-    mCtx.fillStyle = "black";
-    mCtx.fillRect(0, 0, mCanvas.width, M_TOP);
-    mCtx.fillStyle = "red";
-    mCtx.font = "20px 'Pixelated', monospace";
-    mCtx.fillText(`MINES: ${M_MINES - mFlags}`, 10, 22);
+    drawOutsetBorder(mCtx, 0, 0, mCanvas.width, mCanvas.height, 3);
 
+    drawInsetBorder(mCtx, MARGIN_X, MARGIN_Y, GRID_W, HEADER_H, 2);
+
+    drawDigitalDisplay(mCtx, MARGIN_X + 8, MARGIN_Y + 7, M_MINES - mFlags); // Minas
+    drawDigitalDisplay(mCtx, MARGIN_X + GRID_W - 68, MARGIN_Y + 7, mTimer); // Tempo
+
+    //botão do smiley
+    let btnX = MARGIN_X + (GRID_W / 2) - 18;
+    let btnY = MARGIN_Y + 5;
+    mCtx.fillStyle = "#c0c0c0";
+    mCtx.fillRect(btnX, btnY, 36, 36);
+    drawOutsetBorder(mCtx, btnX, btnY, 36, 36, 2);
+    
+    mCtx.font = "24px Arial";
+    mCtx.textAlign = "center";
+    mCtx.textBaseline = "middle";
+    mCtx.fillStyle = "black";
+    mCtx.fillText(mFace, btnX + 18, btnY + 20);
+
+    //area da Grelha afundada
+    drawInsetBorder(mCtx, MARGIN_X, GRID_TOP, GRID_W, GRID_H, 3);
+
+    //células
+    mCtx.font = "bold 20px Arial";
     for (let r = 0; r < M_ROWS; r++) {
         for (let c = 0; c < M_COLS; c++) {
             let cell = mGrid[r][c];
-            let x = c * M_CELL;
-            let y = r * M_CELL + M_TOP;
+            let x = MARGIN_X + c * M_CELL;
+            let y = GRID_TOP + r * M_CELL;
 
             if (!cell.isRevealed) {
-                mCtx.fillStyle = "#dfdfdf";
+                //bloco por clicar
+                mCtx.fillStyle = "#c0c0c0";
                 mCtx.fillRect(x, y, M_CELL, M_CELL);
-                mCtx.fillStyle = "white";
-                mCtx.fillRect(x, y, M_CELL, 3);
-                mCtx.fillRect(x, y, 3, M_CELL);
-                mCtx.fillStyle = "gray";
-                mCtx.fillRect(x, y + M_CELL - 3, M_CELL, 3);
-                mCtx.fillRect(x + M_CELL - 3, y, 3, M_CELL);
+                drawOutsetBorder(mCtx, x, y, M_CELL, M_CELL, 2);
 
                 if (cell.isFlagged) {
                     mCtx.fillStyle = "red";
-                    mCtx.font = "20px Arial";
-                    mCtx.fillText("🚩", x + 10, y + 28);
+                    mCtx.fillText("🚩", x + M_CELL / 2, y + M_CELL / 2 + 2);
                 }
             } else {
-                mCtx.fillStyle = "#a0a0a0";
+                //bloco Revelado
+                mCtx.fillStyle = "#c0c0c0"; 
                 mCtx.fillRect(x, y, M_CELL, M_CELL);
-                mCtx.strokeStyle = "gray";
+                //borda fininha pontilhada clássica dos abertos
+                mCtx.strokeStyle = "#808080";
+                mCtx.lineWidth = 1;
                 mCtx.strokeRect(x, y, M_CELL, M_CELL);
 
                 if (cell.isMine) {
                     mCtx.fillStyle = "black";
                     mCtx.beginPath();
-                    mCtx.arc(x + 20, y + 20, 10, 0, Math.PI * 2);
+                    mCtx.arc(x + M_CELL/2, y + M_CELL/2, M_CELL * 0.25, 0, Math.PI * 2);
                     mCtx.fill();
                 } else if (cell.neighborMines > 0) {
-                    const colors = ["", "blue", "green", "red", "darkblue", "darkred", "teal", "black", "gray"];
+                    const colors = ["", "#0000FF", "#008000", "#FF0000", "#000080", "#800000", "#008080", "#000000", "#808080"];
                     mCtx.fillStyle = colors[cell.neighborMines];
-                    mCtx.font = "bold 24px Arial";
-                    mCtx.fillText(cell.neighborMines, x + 12, y + 28);
+                    mCtx.fillText(cell.neighborMines, x + M_CELL / 2, y + M_CELL / 2 + 2);
                 }
             }
         }
     }
+    
+    //repõe definições padrão
+    mCtx.textAlign = "start";
+    mCtx.textBaseline = "alphabetic";
 }
 
+//fim do jogo
 function endMinesweeper(isWin) {
     mRunning = false;
+    clearInterval(mTimerInterval);
+    
+    mFace = isWin ? "😎" : "😵"; 
+
     for (let r = 0; r < M_ROWS; r++) {
         for (let c = 0; c < M_COLS; c++) {
             if (mGrid[r][c].isMine) mGrid[r][c].isRevealed = true;
         }
     }
-    drawMinesweeperBoard();
+    
+    drawMinesweeperBoard(); 
 
     mMsg.innerText = isWin ? "YOU WIN!" : "BOOM! GAME OVER";
     mMsg.style.color = isWin ? "green" : "red";
     mOverlay.style.display = 'flex';
-
+    
     if (!isWin && typeof soundLoser !== 'undefined') playSound(soundLoser);
 
     if (isWin) {
-        showPeeps("Impressive pattern recognition! Great work!", "megaHappy", 5000);
+        if (typeof showPeeps === 'function') showPeeps("Impressive pattern recognition! Are you sure you are human?", "megaHappy", 5000);
     } else {
-        if (mRevealed < 5) showPeeps("Wow. Exploded right at the start? How... funny.", "apprehensive", 4000);
-        else if (mRevealed >= 5 && mRevealed < 40) showPeeps("A simple miscalculation. Next time for sure.", "neutral", 5000);
-        else showPeeps("You were sooo close! Pay attention next time", "side", 5000);
+        if (typeof showPeeps === 'function') {
+            if (mRevealed < 5) showPeeps("Wow. Exploded right at the start? How... funny.", "apprehensive", 4000);
+            else if (mRevealed >= 5 && mRevealed < 40) showPeeps("A simple miscalculation. Next time for sure.", "neutral", 5000);
+            else showPeeps("You were so close! Pay more attention next time.", "side", 5000);
+        }
+    }
+}
+
+//snake
+
+const sCanvas = document.getElementById('snake-canvas');
+const sCtx = sCanvas ? sCanvas.getContext('2d') : null;
+const sOverlay = document.getElementById('snake-overlay');
+const sMsg = document.getElementById('snake-msg');
+
+const S_GRID = 20;
+const S_TOP = 30;
+let sSnake = [];
+let sApple = {x: 0, y: 0};
+let sDx = S_GRID;
+let sDy = 0;
+let sScore = 0;
+let sRunning = false;
+let sTimer = null;
+let sSpeed = 120;
+let sNextDir = {dx: S_GRID, dy: 0};
+
+function adaptSnakeCanvas() {
+    if (!sCanvas) return;
+    const container = sCanvas.parentElement;
+    if (!container) return;
+
+    let availableW = container.clientWidth;
+    let availableH = container.clientHeight;
+
+    let cols = Math.floor(availableW / S_GRID);
+    let rows = Math.floor((availableH - S_TOP) / S_GRID);
+
+    //limites de segurança caso a janela seja muito encolhida
+    if (cols < 5) cols = 5;
+    if (rows < 5) rows = 5;
+
+    let newW = cols * S_GRID;
+    let newH = S_TOP + (rows * S_GRID);
+
+    if (sCanvas.width !== newW || sCanvas.height !== newH) {
+        sCanvas.width = newW;
+        sCanvas.height = newH;
+        
+        //se a maçã ficar de fora do novo ecrã, gera uma nova
+        if (sRunning && (sApple.x >= newW || sApple.y >= newH)) {
+            placeApple();
+        }
+    }
+}
+
+function startSnake() {
+    if (!sCanvas) return;
+    
+    adaptSnakeCanvas();
+    
+    sRunning = true;
+    sScore = 0;
+    sDx = S_GRID;
+    sDy = 0;
+    sNextDir = {dx: S_GRID, dy: 0};
+    sSpeed = 120;
+    sOverlay.style.display = 'none';
+
+    let startY = S_TOP + Math.floor(((sCanvas.height - S_TOP) / S_GRID) / 2) * S_GRID;
+    let startX = Math.floor((sCanvas.width / S_GRID) / 2) * S_GRID;
+    
+    sSnake = [
+        {x: startX, y: startY},
+        {x: startX - S_GRID, y: startY},
+        {x: startX - S_GRID * 2, y: startY},
+        {x: startX - S_GRID * 3, y: startY}
+    ];
+
+    placeApple();
+    if (sTimer) clearTimeout(sTimer);
+    snakeLoop();
+}
+
+//coloca a maçã numa posição aleatória
+function placeApple() {
+    let freeSpaces = [];
+    let maxCols = sCanvas.width / S_GRID;
+    let maxRows = (sCanvas.height - S_TOP) / S_GRID;
+
+    //percorre toda a grelha
+    for (let r = 0; r < maxRows; r++) {
+        for (let c = 0; c < maxCols; c++) {
+            let checkX = c * S_GRID;
+            let checkY = r * S_GRID + S_TOP;
+            
+            //verifica se a cobra está neste quadrado
+            let isOccupied = false;
+            for (let i = 0; i < sSnake.length; i++) {
+                if (sSnake[i].x === checkX && sSnake[i].y === checkY) {
+                    isOccupied = true;
+                    break;
+                }
+            }
+
+            //se o espaço estiver livre, guarda as coordenadas no array
+            if (!isOccupied) {
+                freeSpaces.push({ x: checkX, y: checkY });
+            }
+        }
+    }
+
+    //se a cobra preencheu o ecrã
+    if (freeSpaces.length === 0) {
+        endSnake(); 
+        return;
+    }
+
+    //escolhe aleatoriamente um dos espaços livres
+    let randomIndex = Math.floor(Math.random() * freeSpaces.length);
+    sApple.x = freeSpaces[randomIndex].x;
+    sApple.y = freeSpaces[randomIndex].y;
+}
+
+function snakeLoop() {
+    if (!sRunning) return;
+
+    adaptSnakeCanvas();
+
+    sTimer = setTimeout(() => {
+        requestAnimationFrame(snakeLoop);
+    }, sSpeed);
+
+    //atualiza a direção
+    sDx = sNextDir.dx;
+    sDy = sNextDir.dy;
+
+    const head = {x: sSnake[0].x + sDx, y: sSnake[0].y + sDy};
+
+    //bater nas paredes
+    if (head.x < 0 || head.x >= sCanvas.width || head.y < S_TOP || head.y >= sCanvas.height) {
+        endSnake();
+        return;
+    }
+
+    //bater nela própria
+    for (let i = 0; i < sSnake.length; i++) {
+        if (head.x === sSnake[i].x && head.y === sSnake[i].y) {
+            endSnake();
+            return;
+        }
+    }
+
+    //move a cobra
+    sSnake.unshift(head);
+
+    //verifica se comeu a maçã
+    if (head.x === sApple.x && head.y === sApple.y) {
+        sScore++;
+        if (typeof soundPoint !== 'undefined') playSound(soundPoint);
+        placeApple();
+        //aumenta ligeiramente a velocidade
+        if (sSpeed > 60) sSpeed -= 2; 
+    } else {
+        //se não comeu, remove a cauda
+        sSnake.pop();
+    }
+
+    drawSnakeBoard();
+}
+
+function drawSnakeBoard() {
+    //fundo
+    sCtx.fillStyle = "#808080";
+    sCtx.fillRect(0, S_TOP, sCanvas.width, sCanvas.height - S_TOP);
+
+    //cabeçalho / Visor
+    sCtx.fillStyle = "black";
+    sCtx.fillRect(0, 0, sCanvas.width, S_TOP);
+    sCtx.fillStyle = "white";
+    sCtx.fillRect(0, S_TOP, sCanvas.width, 2); // Linha separadora
+    
+    //visor Digital
+    sCtx.fillStyle = "red";
+    sCtx.font = "20px 'Pixelated', monospace";
+    sCtx.fillText(`APPLES: ${sScore.toString().padStart(3, '0')}`, 10, 22);
+
+    //desenha a Maçã
+    sCtx.fillStyle = "red";
+    sCtx.fillRect(sApple.x + 2, sApple.y + 2, S_GRID - 4, S_GRID - 4);
+    //haste verde da maçã
+    sCtx.fillStyle = "green";
+    sCtx.fillRect(sApple.x + 8, sApple.y, 4, 4);
+
+    // Desenha a Cobra
+    for (let i = 0; i < sSnake.length; i++) {
+        // A cabeça tem uma cor ligeiramente diferente do corpo
+        sCtx.fillStyle = i === 0 ? "#00FF00" : "#00AA00";
+        sCtx.fillRect(sSnake[i].x + 1, sSnake[i].y + 1, S_GRID - 2, S_GRID - 2);
+        
+        //se for a cabeça, desenha os olhos!
+        if (i === 0) {
+            sCtx.fillStyle = "black";
+            //os olhos mudam de posição dependendo de para onde a cobra olha
+            if (sDx === S_GRID) { //direita
+                sCtx.fillRect(sSnake[i].x + 12, sSnake[i].y + 4, 4, 4);
+                sCtx.fillRect(sSnake[i].x + 12, sSnake[i].y + 12, 4, 4);
+            } else if (sDx === -S_GRID) { //esquerda
+                sCtx.fillRect(sSnake[i].x + 4, sSnake[i].y + 4, 4, 4);
+                sCtx.fillRect(sSnake[i].x + 4, sSnake[i].y + 12, 4, 4);
+            } else if (sDy === S_GRID) { //baixo
+                sCtx.fillRect(sSnake[i].x + 4, sSnake[i].y + 12, 4, 4);
+                sCtx.fillRect(sSnake[i].x + 12, sSnake[i].y + 12, 4, 4);
+            } else if (sDy === -S_GRID) { //cima
+                sCtx.fillRect(sSnake[i].x + 4, sSnake[i].y + 4, 4, 4);
+                sCtx.fillRect(sSnake[i].x + 12, sSnake[i].y + 4, 4, 4);
+            }
+        }
+    }
+}
+
+//controlos
+document.addEventListener('keydown', (e) => {
+    //só responde se a janela estiver aberta
+    const snakeWin = document.getElementById('snake-app');
+    if (!sRunning || !snakeWin || snakeWin.style.display === 'none') return;
+
+    //impede scroll da página com as setas
+    if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) {
+        e.preventDefault();
+    }
+
+    if (e.key === 'ArrowLeft' && sDx === 0) sNextDir = {dx: -S_GRID, dy: 0};
+    else if (e.key === 'ArrowUp' && sDy === 0) sNextDir = {dx: 0, dy: -S_GRID};
+    else if (e.key === 'ArrowRight' && sDx === 0) sNextDir = {dx: S_GRID, dy: 0};
+    else if (e.key === 'ArrowDown' && sDy === 0) sNextDir = {dx: 0, dy: S_GRID};
+});
+
+function endSnake() {
+    sRunning = false;
+    clearTimeout(sTimer);
+
+    sMsg.innerText = "GAME OVER";
+    sMsg.style.color = "red";
+    sOverlay.style.display = 'flex';
+    
+    if (typeof soundLoser !== 'undefined') playSound(soundLoser);
+
+    if (typeof showPeeps === 'function') {
+        if (sScore < 5) {
+            showPeeps("Having problems with coordination?", "apprehensive", 5000);
+        } else if (sScore >= 5 && sScore < 15) {
+            showPeeps("Mindless consumption leading to self-destruction. A perfect metaphor for humanity.", "side", 6000);
+        } else {
+            showPeeps("Fantastic! Great work.", "megaHappy", 5000);
+        }
     }
 }

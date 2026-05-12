@@ -34,13 +34,14 @@ if (participantDir["Desktop"].children["Games"]) {
     saveVFS();
 }
 
-// 2. Cria a pasta Games como uma pasta de Sistema (fora do Desktop)
+//cria a pasta Games
 if (!participantDir["Games"]) {
     participantDir["Games"] = {
         type: "folder",
         children: {
             "Bird.exe": { type: "exe", action: "flappy" },
-            "Minesweeper.exe": { type: "exe", action: "minesweeper" }
+            "Minesweeper.exe": { type: "exe", action: "minesweeper" },
+            "Snake.exe": { type: "exe", action: "snake" },
         }
     };
     saveVFS();
@@ -304,6 +305,7 @@ function renderFileExplorer() {
             fileDiv.ondblclick = () => {
                 if (data.action === 'flappy') openWindow('flappy-app');
                 else if (data.action === 'minesweeper') openWindow('minesweeper-app');
+                else if (data.action === 'snake') openWindow('snake-app');
             };
         }
 

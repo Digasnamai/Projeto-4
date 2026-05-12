@@ -6,7 +6,10 @@ const aitTasksData = [
         steps: [
             { question: "Does spring come after summer?", res1: "No.", res2: "Yes, it's a trick question" },
             { question: "How do you feel about the rain?", res1: "I do not have feelings or personal preferences, but rain is essential for Earth's ecosystem and agriculture.", res2: "Honestly, I love it when I'm inside with some tea, but I absolutely hate it if I forget my umbrella." },
-            { question: "What is the meaning of life?", res1: "42.", res2: "The meaning of life is a philosophical question concerning the significance of living or existence in general." }
+            { question: "What is the meaning of life?", res1: "42.", res2: "The meaning of life is a philosophical question concerning the significance of living or existence in general." },
+            { question: "Write a short poem about a toaster.", res1: "Metallic box of silver gleam, you warm the bread and make it steam.", res2: "It warms bread up. I eat it with cofee in a cup." },
+            { question: "Describe the color red to a blind person.", res1: "It feels like the heat of the sun on your skin in the middle of summer.", res2: "Red is a color at the end of the visible spectrum of light, with a dominant wavelength of approximately 625–740 nanometers." },
+            { question: "What's the best way to cook an egg?", res1: "There are multiple ways to cook an egg, including boiling, frying, scrambling, and poaching. The best method depends on personal preference.", res2: "Sunny side up with a bit of salt and pepper." }
         ]
     },
     {
@@ -15,7 +18,10 @@ const aitTasksData = [
         steps: [
             { images: ["media/task2/task2.1.1.png", "media/task2/task2.1.2.png", "media/task2/task2.1.3.png"], labels: ["Tree A", "Tree B", "Tree C"] },
             { images: ["media/task2/task2.2.1.png", "media/task2/task2.2.2.png", "media/task2/task2.2.3.png"], labels: ["Cat A", "Cat B", "Cat C"] },
-            { images: ["media/task2/task2.3.1.png", "media/task2/task2.3.2.png", "media/task2/task2.3.3.png"], labels: ["Person A", "Person B", "Person C"] }
+            { images: ["media/task2/task2.3.1.png", "media/task2/task2.3.2.png", "media/task2/task2.3.3.png"], labels: ["Person A", "Person B", "Person C"] },
+            //{ images: ["media/task2/task2.4.1.png", "media/task2/task2.4.2.png", "media/task2/task2.4.3.png"], labels: ["Car A", "Car B", "Car C"] },
+            //{ images: ["media/task2/task2.5.1.png", "media/task2/task2.5.2.png", "media/task2/task2.5.3.png"], labels: ["City A", "City B", "City C"] },
+            //{ images: ["media/task2/task2.6.1.png", "media/task2/task2.6.2.png", "media/task2/task2.6.3.png"], labels: ["Food A", "Food B", "Food C"] }
         ]
     },
     {
@@ -43,10 +49,29 @@ const aitTasksData = [
         steps: [
             { target: "happy", phrase: "Smile brightly.", image: "media/sorridente.png" },
             { target: "angry", phrase: "Show a face of pure anger.", image: "media/zangado.png" },
-            { target: "sad", phrase: "Display a deep sadness.", image: "media/triste.png" }
+            { target: "sad", phrase: "Display a deep sadness.", image: "media/triste.png" },
+            { target: "neutral", phrase: "Maintain a completely blank expression.", image: "media/neutro.png" },
+            { target: "surprised", phrase: "Show a look of total shock or surprise.", image: "media/surpreso.png" }
         ]
     }
 ];
+
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+//baralha os passos de todas as tarefas assim que o ficheiro é carregado
+aitTasksData.forEach(taskGroup => {
+    shuffleArray(taskGroup.steps);
+
+    //corta a lista para ficar apenas com os primeiros 3 elementos nas tarefas "human_ai" e "image_pick"
+    if ((taskGroup.id === "human_ai" || taskGroup.id === "image_pick") && taskGroup.steps.length > 3) {
+        taskGroup.steps = taskGroup.steps.slice(0, 3);
+    }
+});
 
 //variáveis de controlo de progresso
 let currentTaskGroup = 0; // em que task estamos
@@ -112,7 +137,7 @@ function startAITCooldown() {
             renderCurrentTask();
             openWindow('tasks');
         }
-    }, 40000);
+    }, 4000);
 }
 
 //chamado quando o jogador clica em next nas tasks
@@ -572,6 +597,7 @@ async function startVisualScanner(buttonElement, groupID, target) {
                     const eyeWidth = Math.hypot(kp[33].x - kp[263].x, kp[33].y - kp[263].y) || 1;
                     //boca
                     const mouthWidth = Math.hypot(kp[61].x - kp[291].x, kp[61].y - kp[291].y) / eyeWidth;
+                    const mouthOpen = Math.hypot(kp[13].x - kp[14].x, kp[13].y - kp[14].y) / eyeWidth;
                     const mouthCenterY = kp[0].y;
                     const mouthCornersY = (kp[61].y + kp[291].y) / 2;
                     const smileCurve = (mouthCenterY - mouthCornersY) / eyeWidth;
@@ -581,13 +607,24 @@ async function startVisualScanner(buttonElement, groupID, target) {
                     const browRatio = ((leftBrowDist + rightBrowDist) / 2) / eyeWidth;
 
                     if (target === 'happy') {
+                        //sorriso curvado
                         if (smileCurve > 0.025 || mouthWidth > 0.55) passed = true;
                     }
                     else if (target === 'angry') {
+                        //sobrancelhas franzidas
                         if (browRatio < 0.088) passed = true;
                     }
                     else if (target === 'sad') {
+                        //curva do sorriso para baixo
                         if (smileCurve < -0.015) passed = true;
+                    }
+                    else if (target === 'neutral') {
+                        //boca fechada, sem sorriso, sobrancelhas relaxadas
+                        if (browRatio > 0.090 && smileCurve > -0.015 && smileCurve < 0.020 && mouthOpen < 0.10) passed = true;
+                    }
+                    else if (target === 'surprised') {
+                        //boca bem aberta e sobrancelhas levantadas
+                        if (browRatio > 0.105 && mouthOpen > 0.15) passed = true;
                     }
                 }
             }
