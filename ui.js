@@ -362,6 +362,7 @@ function showDialog({ type, title, message, defaultValue = "", icon = "⚠️" }
     return new Promise((resolve) => {
         const dialog = document.getElementById('percepta-dialog');
         const inputEl = document.getElementById('dialog-input');
+        inputEl.setAttribute('autocomplete', 'off');
         const btnCancel = document.getElementById('dialog-btn-cancel');
         const btnOk = document.getElementById('dialog-btn-ok');
         const btnClose = document.getElementById('dialog-btn-close');
@@ -435,9 +436,9 @@ function getNearestFreeSpot(startX, startY) {
 
         // Define direções de busca (Cima,Baixo,Direita,Esquerda)
         const directions = [
-            { dx: 0, dy: -gridSize }, 
-            { dx: 0, dy: gridSize }, 
-            { dx: gridSize, dy: 0 }, 
+            { dx: 0, dy: -gridSize },
+            { dx: 0, dy: gridSize },
+            { dx: gridSize, dy: 0 },
             { dx: -gridSize, dy: 0 }
         ];
 
@@ -501,22 +502,47 @@ function setupIconDrag(icon, vfsName = null) {
         const shiftY = e.clientY - iconRect.top;
 
         function onMouseMove(event) {
-            // Remove seleção de texto para o movimento ser limpo
+            // remove seleção de texto para o movimento ser limpo
             window.getSelection().removeAllRanges();
 
             let x = event.clientX - desktop.left - shiftX;
             let y = event.clientY - desktop.top - shiftY;
 
-            // Impede que o icon saia pelas bordas superiores
+            // impede que o icon saia pelas bordas superiores
             icon.style.left = (x < 0 ? 0 : x) + 'px';
             icon.style.top = (y < 0 ? 0 : y) + 'px';
         }
 
         document.addEventListener('mousemove', onMouseMove);
 
-        document.onmouseup = function () {
+        document.onmouseup = async function (mouseUpEvent) {
             document.removeEventListener('mousemove', onMouseMove);
             document.onmouseup = null;
+
+            const desktopVFS = getFolderByPath("C:\\Users\\Participant\\Desktop");
+
+            icon.style.visibility = 'hidden'; // esconde temporariamente para ver o que está por baixo
+            let elemBelow = document.elementFromPoint(mouseUpEvent.clientX, mouseUpEvent.clientY);
+            icon.style.visibility = 'visible'; // volta a mostrar
+
+            let dropTarget = elemBelow ? elemBelow.closest('.desktop-icon') : null;
+            let targetName = dropTarget ? (dropTarget.getAttribute('data-vfs-name') || dropTarget.innerText.trim()) : "";
+
+            // deteta se o utilizador largou em cima do Recycle Bin 
+            if (dropTarget && (targetName === 'Trash' || dropTarget.id === 'Trash' || targetName === 'Recycle Bin' || dropTarget.innerText.trim() === 'Recycle Bin')) {
+                if (vfsName && desktopVFS[vfsName] && desktopVFS[vfsName].type !== 'locked_folder') {
+                    // reverte o ícone para a posição original antes de perguntar
+                    icon.style.left = desktopVFS[vfsName].x + 'px';
+                    icon.style.top = desktopVFS[vfsName].y + 'px';
+                    
+                    const isSure = await osConfirm(`Move "${vfsName}" to the Recycle Bin?`, "Confirm Delete", "🗑️");
+                    if (isSure) {
+                        moveToTrash("C:\\Users\\Participant\\Desktop", vfsName, desktopVFS[vfsName]);
+                        icon.remove(); // remove o ícone se for apagado
+                    }
+                    return; // termina a função 
+                }
+            }
 
             // snap na grelha
             let curX = parseInt(icon.style.left || 0);
@@ -536,9 +562,7 @@ function setupIconDrag(icon, vfsName = null) {
             icon.style.left = snapX + 'px';
             icon.style.top = snapY + 'px';
 
-            const desktopVFS = getFolderByPath("C:\\Users\\Participant\\Desktop");
-
-            // Se cair em cima de outro, move o outro para o lugar livre mais próximo
+            // se cair em cima de outro, move o outro para o lugar livre mais próximo
             if (overlapping) {
                 let spot = getNearestFreeSpot(snapX, snapY);
                 overlapping.style.left = spot.x + 'px';
@@ -551,7 +575,7 @@ function setupIconDrag(icon, vfsName = null) {
                 }
             }
 
-            // Guarda a nova posição do ícone arrastado no VFS
+            // guarda a nova posição do ícone arrastado no VFS
             if (vfsName && desktopVFS[vfsName]) {
                 desktopVFS[vfsName].x = snapX;
                 desktopVFS[vfsName].y = snapY;
@@ -711,7 +735,7 @@ async function executePaste(targetPath, mouseX = null, mouseY = null) {
             saveVFS();
         }
         vfsClipboard = null;
-        renderDesktop(); 
+        renderDesktop();
         renderFileExplorer();
         return;
     }

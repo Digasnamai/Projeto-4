@@ -223,14 +223,14 @@ function detetarEmocaoSimples(kp) {
     const alturaCantosBoca = (kp[61].y + kp[291].y) / 2;//altura dos cantos da boca
     const curvaturaSorriso = (alturaCentroBoca - alturaCantosBoca) / distanciaOlhos;//pra ver se os cantos tao mais altos q o centro
 
-    let emocaoDetectadaAgora = "Neutro";
+    let emocaoDetectadaAgora = "Neutral";
 
     if (aberturaVerticalBoca > 0.08 || distanciaBoca > 0.59 || curvaturaSorriso > 0.025) {
-        emocaoDetectadaAgora = "Feliz";
+        emocaoDetectadaAgora = "Happy";
     } else if (ratioVerticalSobrancelha < 0.088) {
-        emocaoDetectadaAgora = "Duvidoso";
+        emocaoDetectadaAgora = "Doubtfull";
     } else if (ratioVerticalSobrancelha > 0.095) {
-        emocaoDetectadaAgora = "Neutro";
+        emocaoDetectadaAgora = "Neutral";
     }
 
     if (emocaoDetectadaAgora === emocaoCandidata) {
@@ -243,7 +243,7 @@ function detetarEmocaoSimples(kp) {
     if (contadorFramesEmocao >= 10) {//so passa a ser outra emocao se ela tiver durante 10 frames seguidos pra evitar erros
         return emocaoCandidata;
     } else {
-        return ultimaEmocao || "Neutro";//ou neutro por causa do inicio
+        return ultimaEmocao || "Neutral";//ou neutro por causa do inicio
     }
 }
 

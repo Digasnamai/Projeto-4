@@ -536,7 +536,7 @@ function startSnake() {
     sDx = S_GRID;
     sDy = 0;
     sNextDir = {dx: S_GRID, dy: 0};
-    sSpeed = 120;
+    sSpeed = 250;
     sOverlay.style.display = 'none';
 
     let startY = S_TOP + Math.floor(((sCanvas.height - S_TOP) / S_GRID) / 2) * S_GRID;
@@ -632,7 +632,7 @@ function snakeLoop() {
         if (typeof soundPoint !== 'undefined') playSound(soundPoint);
         placeApple();
         //aumenta ligeiramente a velocidade
-        if (sSpeed > 60) sSpeed -= 2; 
+        if (sSpeed > 100) sSpeed -= 5; 
     } else {
         //se não comeu, remove a cauda
         sSnake.pop();
