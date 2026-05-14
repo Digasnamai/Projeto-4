@@ -184,8 +184,8 @@ function endFlappyGame() {
 //minesweeper
 const mCanvas = document.getElementById('minesweeper-canvas');
 const mCtx = mCanvas ? mCanvas.getContext('2d') : null;
-const mOverlay = document.getElementById('minesweeper-overlay'); 
-const mMsg = document.getElementById('minesweeper-msg');         
+const mOverlay = document.getElementById('minesweeper-overlay');
+const mMsg = document.getElementById('minesweeper-msg');
 
 const M_COLS = 10;
 const M_ROWS = 10;
@@ -211,12 +211,14 @@ let mFirstClick = true; //o timer só começa quando clicamos pela 1ª vez
 
 function startMinesweeper() {
     if (!mCanvas) return;
+    mCanvas.width = 400;
+    mCanvas.height = 445;
     mRunning = true;
     mFlags = 0;
     mRevealed = 0;
     mFace = "🙂";
     mOverlay.style.display = 'none';
-    
+
     //reset ao timer
     clearInterval(mTimerInterval);
     mTimer = 0;
@@ -267,20 +269,25 @@ function createMinesweeperGrid() {
 if (mCanvas) {
     mCanvas.addEventListener('mousedown', (e) => {
         const rect = mCanvas.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
+        
+        const scaleX = mCanvas.width / rect.width;
+        const scaleY = mCanvas.height / rect.height;
 
-        //clique no smiley
+        //multiplica a posição do rato pela escala para bater sempre certo com a grelha
+        const x = Math.floor((e.clientX - rect.left) * scaleX);
+        const y = Math.floor((e.clientY - rect.top) * scaleY);
+
+        //click no smiley
         let btnX = MARGIN_X + (GRID_W / 2) - 18;
         let btnY = MARGIN_Y + 5;
         if (x >= btnX && x <= btnX + 36 && y >= btnY && y <= btnY + 36) {
-            startMinesweeper(); 
+            startMinesweeper();
             return;
         }
 
         if (!mRunning) return;
 
-        //clique na grelha
+        //click na grelha
         if (x >= MARGIN_X && x < MARGIN_X + GRID_W && y >= GRID_TOP && y < GRID_TOP + GRID_H) {
             const c = Math.floor((x - MARGIN_X) / M_CELL);
             const r = Math.floor((y - GRID_TOP) / M_CELL);
@@ -308,7 +315,7 @@ function toggleMinesweeperFlag(r, c) {
     if (cell.isRevealed) return;
     cell.isFlagged = !cell.isFlagged;
     mFlags += cell.isFlagged ? 1 : -1;
-    if (typeof soundPoint !== 'undefined') playSound(soundPoint);
+    playSound(soundFlap);
 }
 
 function revealMinesweeperCell(r, c) {
@@ -317,8 +324,6 @@ function revealMinesweeperCell(r, c) {
 
     cell.isRevealed = true;
     mRevealed++;
-    
-    if (typeof soundFlap !== 'undefined') playSound(soundFlap);
 
     if (cell.isMine) {
         endMinesweeper(false);
@@ -349,24 +354,24 @@ function drawInsetBorder(ctx, x, y, w, h, size) {
 
 function drawOutsetBorder(ctx, x, y, w, h, size) {
     ctx.fillStyle = "#ffffff";
-    ctx.fillRect(x, y, w, size); 
-    ctx.fillRect(x, y, size, h); 
+    ctx.fillRect(x, y, w, size);
+    ctx.fillRect(x, y, size, h);
     ctx.fillStyle = "#808080";
-    ctx.fillRect(x, y + h - size, w, size); 
-    ctx.fillRect(x + w - size, y, size, h); 
+    ctx.fillRect(x, y + h - size, w, size);
+    ctx.fillRect(x + w - size, y, size, h);
 }
 
 function drawDigitalDisplay(ctx, x, y, value) {
     ctx.fillStyle = "black";
     ctx.fillRect(x, y, 60, 32);
     drawInsetBorder(ctx, x, y, 60, 32, 1);
-    
-    ctx.fillStyle = "#4a0000"; 
-    ctx.font = "bold 26px 'Courier New', monospace"; 
+
+    ctx.fillStyle = "#4a0000";
+    ctx.font = "bold 26px 'Courier New', monospace";
     ctx.textAlign = "right";
     ctx.textBaseline = "top";
     ctx.fillText("888", x + 55, y + 4);
-    
+
     ctx.fillStyle = "#ff0000";
     let valStr = Math.max(0, Math.min(999, value)).toString().padStart(3, '0');
     ctx.fillText(valStr, x + 55, y + 4);
@@ -390,7 +395,7 @@ function drawMinesweeperBoard() {
     mCtx.fillStyle = "#c0c0c0";
     mCtx.fillRect(btnX, btnY, 36, 36);
     drawOutsetBorder(mCtx, btnX, btnY, 36, 36, 2);
-    
+
     mCtx.font = "24px Arial";
     mCtx.textAlign = "center";
     mCtx.textBaseline = "middle";
@@ -420,7 +425,7 @@ function drawMinesweeperBoard() {
                 }
             } else {
                 //bloco Revelado
-                mCtx.fillStyle = "#c0c0c0"; 
+                mCtx.fillStyle = "#c0c0c0";
                 mCtx.fillRect(x, y, M_CELL, M_CELL);
                 //borda fininha pontilhada clássica dos abertos
                 mCtx.strokeStyle = "#808080";
@@ -430,7 +435,7 @@ function drawMinesweeperBoard() {
                 if (cell.isMine) {
                     mCtx.fillStyle = "black";
                     mCtx.beginPath();
-                    mCtx.arc(x + M_CELL/2, y + M_CELL/2, M_CELL * 0.25, 0, Math.PI * 2);
+                    mCtx.arc(x + M_CELL / 2, y + M_CELL / 2, M_CELL * 0.25, 0, Math.PI * 2);
                     mCtx.fill();
                 } else if (cell.neighborMines > 0) {
                     const colors = ["", "#0000FF", "#008000", "#FF0000", "#000080", "#800000", "#008080", "#000000", "#808080"];
@@ -440,7 +445,7 @@ function drawMinesweeperBoard() {
             }
         }
     }
-    
+
     //repõe definições padrão
     mCtx.textAlign = "start";
     mCtx.textBaseline = "alphabetic";
@@ -450,31 +455,36 @@ function drawMinesweeperBoard() {
 function endMinesweeper(isWin) {
     mRunning = false;
     clearInterval(mTimerInterval);
-    
-    mFace = isWin ? "😎" : "😵"; 
+
+    mFace = isWin ? "😎" : "😵";
 
     for (let r = 0; r < M_ROWS; r++) {
         for (let c = 0; c < M_COLS; c++) {
             if (mGrid[r][c].isMine) mGrid[r][c].isRevealed = true;
         }
     }
-    
-    drawMinesweeperBoard(); 
+
+    drawMinesweeperBoard();
 
     mMsg.innerText = isWin ? "YOU WIN!" : "BOOM! GAME OVER";
     mMsg.style.color = isWin ? "green" : "red";
+
+    if (mCanvas && mOverlay) {
+        mOverlay.style.width = '100%';
+        mOverlay.style.height = '100%';
+    }
     mOverlay.style.display = 'flex';
-    
-    if (!isWin && typeof soundLoser !== 'undefined') playSound(soundLoser);
+
+    playSound(soundLoser);
 
     if (isWin) {
-        if (typeof showPeeps === 'function') showPeeps("Impressive pattern recognition! Are you sure you are human?", "megaHappy", 5000);
+        showPeeps("Impressive pattern recognition! Are you sure you are human?", "megaHappy", 5000);
     } else {
-        if (typeof showPeeps === 'function') {
-            if (mRevealed < 5) showPeeps("Wow. Exploded right at the start? How... funny.", "apprehensive", 4000);
-            else if (mRevealed >= 5 && mRevealed < 40) showPeeps("A simple miscalculation. Next time for sure.", "neutral", 5000);
-            else showPeeps("You were so close! Pay more attention next time.", "side", 5000);
-        }
+
+        if (mRevealed < 5) showPeeps("Wow. Exploded right at the start? How... funny.", "apprehensive", 4000);
+        else if (mRevealed >= 5 && mRevealed < 40) showPeeps("A simple miscalculation. Next time for sure.", "neutral", 5000);
+        else showPeeps("You were so close! Pay more attention next time.", "side", 5000);
+
     }
 }
 
@@ -488,14 +498,14 @@ const sMsg = document.getElementById('snake-msg');
 const S_GRID = 20;
 const S_TOP = 30;
 let sSnake = [];
-let sApple = {x: 0, y: 0};
+let sApple = { x: 0, y: 0 };
 let sDx = S_GRID;
 let sDy = 0;
 let sScore = 0;
 let sRunning = false;
 let sTimer = null;
 let sSpeed = 120;
-let sNextDir = {dx: S_GRID, dy: 0};
+let sNextDir = { dx: S_GRID, dy: 0 };
 
 function adaptSnakeCanvas() {
     if (!sCanvas) return;
@@ -518,7 +528,7 @@ function adaptSnakeCanvas() {
     if (sCanvas.width !== newW || sCanvas.height !== newH) {
         sCanvas.width = newW;
         sCanvas.height = newH;
-        
+
         //se a maçã ficar de fora do novo ecrã, gera uma nova
         if (sRunning && (sApple.x >= newW || sApple.y >= newH)) {
             placeApple();
@@ -528,25 +538,25 @@ function adaptSnakeCanvas() {
 
 function startSnake() {
     if (!sCanvas) return;
-    
+
     adaptSnakeCanvas();
-    
+
     sRunning = true;
     sScore = 0;
     sDx = S_GRID;
     sDy = 0;
-    sNextDir = {dx: S_GRID, dy: 0};
+    sNextDir = { dx: S_GRID, dy: 0 };
     sSpeed = 250;
     sOverlay.style.display = 'none';
 
     let startY = S_TOP + Math.floor(((sCanvas.height - S_TOP) / S_GRID) / 2) * S_GRID;
     let startX = Math.floor((sCanvas.width / S_GRID) / 2) * S_GRID;
-    
+
     sSnake = [
-        {x: startX, y: startY},
-        {x: startX - S_GRID, y: startY},
-        {x: startX - S_GRID * 2, y: startY},
-        {x: startX - S_GRID * 3, y: startY}
+        { x: startX, y: startY },
+        { x: startX - S_GRID, y: startY },
+        { x: startX - S_GRID * 2, y: startY },
+        { x: startX - S_GRID * 3, y: startY }
     ];
 
     placeApple();
@@ -565,7 +575,7 @@ function placeApple() {
         for (let c = 0; c < maxCols; c++) {
             let checkX = c * S_GRID;
             let checkY = r * S_GRID + S_TOP;
-            
+
             //verifica se a cobra está neste quadrado
             let isOccupied = false;
             for (let i = 0; i < sSnake.length; i++) {
@@ -584,7 +594,7 @@ function placeApple() {
 
     //se a cobra preencheu o ecrã
     if (freeSpaces.length === 0) {
-        endSnake(); 
+        endSnake();
         return;
     }
 
@@ -607,7 +617,7 @@ function snakeLoop() {
     sDx = sNextDir.dx;
     sDy = sNextDir.dy;
 
-    const head = {x: sSnake[0].x + sDx, y: sSnake[0].y + sDy};
+    const head = { x: sSnake[0].x + sDx, y: sSnake[0].y + sDy };
 
     //bater nas paredes
     if (head.x < 0 || head.x >= sCanvas.width || head.y < S_TOP || head.y >= sCanvas.height) {
@@ -629,10 +639,10 @@ function snakeLoop() {
     //verifica se comeu a maçã
     if (head.x === sApple.x && head.y === sApple.y) {
         sScore++;
-        if (typeof soundPoint !== 'undefined') playSound(soundPoint);
+        playSound(soundPoint);
         placeApple();
         //aumenta ligeiramente a velocidade
-        if (sSpeed > 100) sSpeed -= 5; 
+        if (sSpeed > 100) sSpeed -= 5;
     } else {
         //se não comeu, remove a cauda
         sSnake.pop();
@@ -651,7 +661,7 @@ function drawSnakeBoard() {
     sCtx.fillRect(0, 0, sCanvas.width, S_TOP);
     sCtx.fillStyle = "white";
     sCtx.fillRect(0, S_TOP, sCanvas.width, 2); // Linha separadora
-    
+
     //visor Digital
     sCtx.fillStyle = "red";
     sCtx.font = "20px 'Pixelated', monospace";
@@ -664,12 +674,12 @@ function drawSnakeBoard() {
     sCtx.fillStyle = "green";
     sCtx.fillRect(sApple.x + 8, sApple.y, 4, 4);
 
-    // Desenha a Cobra
+    //desenha a Cobra
     for (let i = 0; i < sSnake.length; i++) {
-        // A cabeça tem uma cor ligeiramente diferente do corpo
+        //a cabeça tem uma cor ligeiramente diferente do corpo
         sCtx.fillStyle = i === 0 ? "#00FF00" : "#00AA00";
         sCtx.fillRect(sSnake[i].x + 1, sSnake[i].y + 1, S_GRID - 2, S_GRID - 2);
-        
+
         //se for a cabeça, desenha os olhos!
         if (i === 0) {
             sCtx.fillStyle = "black";
@@ -702,10 +712,10 @@ document.addEventListener('keydown', (e) => {
         e.preventDefault();
     }
 
-    if (e.key === 'ArrowLeft' && sDx === 0) sNextDir = {dx: -S_GRID, dy: 0};
-    else if (e.key === 'ArrowUp' && sDy === 0) sNextDir = {dx: 0, dy: -S_GRID};
-    else if (e.key === 'ArrowRight' && sDx === 0) sNextDir = {dx: S_GRID, dy: 0};
-    else if (e.key === 'ArrowDown' && sDy === 0) sNextDir = {dx: 0, dy: S_GRID};
+    if (e.key === 'ArrowLeft' && sDx === 0) sNextDir = { dx: -S_GRID, dy: 0 };
+    else if (e.key === 'ArrowUp' && sDy === 0) sNextDir = { dx: 0, dy: -S_GRID };
+    else if (e.key === 'ArrowRight' && sDx === 0) sNextDir = { dx: S_GRID, dy: 0 };
+    else if (e.key === 'ArrowDown' && sDy === 0) sNextDir = { dx: 0, dy: S_GRID };
 });
 
 function endSnake() {
@@ -715,16 +725,16 @@ function endSnake() {
     sMsg.innerText = "GAME OVER";
     sMsg.style.color = "red";
     sOverlay.style.display = 'flex';
-    
-    if (typeof soundLoser !== 'undefined') playSound(soundLoser);
 
-    if (typeof showPeeps === 'function') {
-        if (sScore < 5) {
-            showPeeps("Having problems with coordination?", "apprehensive", 5000);
-        } else if (sScore >= 5 && sScore < 15) {
-            showPeeps("Mindless consumption leading to self-destruction. A perfect metaphor for humanity.", "side", 6000);
-        } else {
-            showPeeps("Fantastic! Great work.", "megaHappy", 5000);
-        }
+    playSound(soundLoser);
+
+
+    if (sScore < 5) {
+        showPeeps("Having problems with coordination?", "apprehensive", 5000);
+    } else if (sScore >= 5 && sScore < 15) {
+        showPeeps("Mindless consumption leading to self-destruction. A perfect metaphor for humanity.", "side", 6000);
+    } else {
+        showPeeps("Fantastic! Great work.", "megaHappy", 5000);
     }
+
 }

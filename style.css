@@ -911,3 +911,10 @@ button:disabled {
 #desktop, #taskbar {
   transition: transform 0.1s;
 }
+
+#minesweeper-canvas {
+    display: block;      
+    width: 100%;         
+    height: 100%;       
+    object-fit: fill;    
+}
